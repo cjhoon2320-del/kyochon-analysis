@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -329,6 +330,16 @@ const BRANDS = [
   {id:'local',     name:'동네치킨', kw:'치킨',           color:'#777',    emoji:'🏘️'},
 ];
 
+// 프랜차이즈 필터링용 키워드 (동네치킨 제외용)
+const ALL_FRANCHISE_KEYWORDS = [
+  '교촌','bhc','비에이치씨','bbq','비비큐','굽네','푸라닭','네네','60계','육십계','노랑통닭','맥시카나',
+  '처갓집','호식이','페리카나','지코바','자담','깐부','바른치킨','순수치킨','땅땅','디디','멕시칸','또래오래',
+  '치킨매니아','치킨플러스','후라이드참잘하는집','후참','아웃닭','썬더치킨','치킨마루','부어치킨','오븐에빠진닭','오빠닭',
+  '맛닭꼬','깐풍기브라더스','다사랑','동근이','철인7호','컬투치킨','티바두마리','호치킨','훌랄라','가마로강정',
+  '만석닭강정','일미닭강정','단양흑마늘닭강정','속초해스호닭강정','신포닭강정','중앙닭강정','명품닭강정','맘스터치',
+  'KFC','kfc','롯데리아'
+];
+
 // ═══════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════
@@ -477,17 +488,23 @@ function runAnalysis(){
     setStatus(`🔍 "${brand.name}" 검색 중... (${idx}/${activeBrands.length})`);
 
     ps.keywordSearch(brand.kw, function(data,st){
-      const franchiseNames=BRANDS.filter(b=>b.id!=='local').map(b=>b.name.toLowerCase().replace('치킨','').trim());
       let results=[];
       if(st===kakao.maps.services.Status.OK){
         results=data.filter(p=>{
           const d=getDist(currentCenter.lat,currentCenter.lng,parseFloat(p.y),parseFloat(p.x));
           return d<=radius;
         });
+        
+        // 동네치킨 필터링 강화
         if(brand.id==='local'){
-          results=results.filter(p=>!franchiseNames.some(fn=>p.place_name.toLowerCase().includes(fn)));
+          results = results.filter(p => {
+            const pname = p.place_name.toLowerCase().replace(/\s/g, '');
+            // 프랜차이즈 키워드가 하나라도 포함되어 있으면 제외
+            return !ALL_FRANCHISE_KEYWORDS.some(fk => pname.includes(fk.toLowerCase()));
+          });
         }
       }
+      
       analysisData[brand.id]=results.map(p=>({
         name:p.place_name, address:p.address_name||'—',
         phone:p.phone||'—', url:p.place_url||'',
@@ -495,21 +512,21 @@ function runAnalysis(){
         distance:Math.round(getDist(currentCenter.lat,currentCenter.lng,parseFloat(p.y),parseFloat(p.x)))
       }));
 
-      results.forEach(p=>addBrandMarker(brand,p));
+      // 마커 표시
+      analysisData[brand.id].forEach(p=>addBrandMarker(brand,p));
 
       // place list
-      results.forEach(p=>{
-        const d=Math.round(getDist(currentCenter.lat,currentCenter.lng,parseFloat(p.y),parseFloat(p.x)));
+      analysisData[brand.id].forEach(p=>{
         const li=document.createElement('div');
         li.style.cssText='display:flex;align-items:center;gap:6px;padding:4px 2px;border-bottom:1px solid #f5f5f5;cursor:pointer;font-size:11px;';
         li.innerHTML=`<span style="font-size:14px;">${brand.emoji}</span>
-          <span style="flex:1;font-weight:700;">${p.place_name}</span>
-          <span style="color:#bbb;">${d}m</span>`;
-        li.onclick=()=>map.setCenter(new kakao.maps.LatLng(parseFloat(p.y),parseFloat(p.x)));
+          <span style="flex:1;font-weight:700;">${p.name}</span>
+          <span style="color:#bbb;">${p.distance}m</span>`;
+        li.onclick=()=>map.setCenter(new kakao.maps.LatLng(p.lat,p.lng));
         document.getElementById('placeList').appendChild(li);
       });
 
-      addLog(`${brand.emoji} ${brand.name}: ${results.length}개 발견`, brand.color);
+      addLog(`${brand.emoji} ${brand.name}: ${analysisData[brand.id].length}개 발견`, brand.color);
       setTimeout(next,300);
     },{
       location:new kakao.maps.LatLng(currentCenter.lat,currentCenter.lng),
@@ -524,8 +541,8 @@ function runAnalysis(){
 //  MARKERS
 // ═══════════════════════════════════════
 function addBrandMarker(brand,place){
-  const pos=new kakao.maps.LatLng(parseFloat(place.y),parseFloat(place.x));
-  const id=encodeURIComponent(place.place_name+place.x+place.y);
+  const pos=new kakao.maps.LatLng(place.lat,place.lng);
+  const id=encodeURIComponent(place.name+place.lng+place.lat);
   const content=`
     <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;"
          onclick="markerClick('${id}')">
@@ -537,7 +554,7 @@ function addBrandMarker(brand,place){
       <div style="background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:700;
                   padding:2px 5px;border-radius:3px;margin-top:2px;white-space:nowrap;
                   max-width:80px;overflow:hidden;text-overflow:ellipsis;">
-        ${place.place_name}
+        ${place.name}
       </div>
     </div>`;
   const ov=new kakao.maps.CustomOverlay({position:pos,content,yAnchor:1.1,zIndex:5});
@@ -549,20 +566,19 @@ function markerClick(id){
   const found=allOverlays.find(m=>m.id===id);
   if(!found) return;
   const p=found.place, b=found.brand;
-  const dist=Math.round(getDist(currentCenter.lat,currentCenter.lng,parseFloat(p.y),parseFloat(p.x)));
   if(infoOverlay) infoOverlay.setMap(null);
-  const pos=new kakao.maps.LatLng(parseFloat(p.y),parseFloat(p.x));
+  const pos=new kakao.maps.LatLng(p.lat,p.lng);
   infoOverlay=new kakao.maps.CustomOverlay({
     position:pos,
     content:`<div class="info-wrap" style="border-top-color:${b.color};">
       <button onclick="if(window._iov)window._iov.setMap(null);"
         style="position:absolute;top:5px;right:7px;background:none;border:none;font-size:13px;cursor:pointer;color:#bbb;">✕</button>
-      <div style="font-size:13px;font-weight:800;margin-bottom:7px;">${b.emoji} ${p.place_name}</div>
-      <div class="iw-row"><span class="iw-k">주소</span><span class="iw-v">${p.address_name||'—'}</span></div>
-      <div class="iw-row"><span class="iw-k">거리</span><span class="iw-v">${dist}m</span></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:7px;">${b.emoji} ${p.name}</div>
+      <div class="iw-row"><span class="iw-k">주소</span><span class="iw-v">${p.address||'—'}</span></div>
+      <div class="iw-row"><span class="iw-k">거리</span><span class="iw-v">${p.distance}m</span></div>
       <div class="iw-row"><span class="iw-k">전화</span><span class="iw-v">${p.phone||'—'}</span></div>
       <div class="iw-row"><span class="iw-k">브랜드</span><span class="iw-v" style="color:${b.color};">${b.name}</span></div>
-      ${p.place_url?`<a href="${p.place_url}" target="_blank"
+      ${p.url?`<a href="${p.url}" target="_blank"
         style="display:block;margin-top:8px;background:${b.color};color:#fff;text-align:center;
                padding:5px;border-radius:5px;font-size:11px;font-weight:700;text-decoration:none;">
         카카오맵에서 보기 →</a>`:''}
