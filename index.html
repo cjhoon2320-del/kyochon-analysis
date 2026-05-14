@@ -1,10 +1,9 @@
-html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>교촌에프앤비 상권분석 툴</title>
+  <title>교촌에프앤비 상권분석 툴 v2.0</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;background:#f0f2f5;color:#222;}
@@ -15,62 +14,70 @@ html
     .nav-right{font-size:12px;display:flex;align-items:center;gap:12px;}
     .badge{background:#ff0;color:#c8151b;font-weight:800;font-size:10px;padding:2px 7px;border-radius:8px;}
     .main{display:flex;margin-top:52px;height:calc(100vh - 52px);}
-    .sidebar{width:275px;min-width:275px;background:#fff;border-right:1px solid #e4e4e4;
+    .sidebar{width:282px;min-width:282px;background:#fff;border-right:1px solid #e4e4e4;
       display:flex;flex-direction:column;overflow-y:auto;z-index:10;}
-    .ss{padding:12px 14px;border-bottom:1px solid #f2f2f2;}
+    .ss{padding:11px 13px;border-bottom:1px solid #f2f2f2;}
     .ss h3{font-size:10px;font-weight:800;color:#999;text-transform:uppercase;
-      letter-spacing:.8px;margin-bottom:8px;}
+      letter-spacing:.8px;margin-bottom:7px;}
+    .ss-sub{font-size:9px;color:#bbb;font-weight:700;margin:6px 0 4px;letter-spacing:.4px;}
     .sw{position:relative;}
-    .sw input{width:100%;padding:8px 10px 8px 30px;border:1.5px solid #ddd;border-radius:7px;
+    .sw input{width:100%;padding:7px 10px 7px 28px;border:1.5px solid #ddd;border-radius:7px;
       font-size:12px;outline:none;transition:border .2s;}
     .sw input:focus{border-color:#c8151b;}
-    .sw .si{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#bbb;}
-    .sbtn{margin-top:7px;width:100%;padding:8px;background:#c8151b;color:#fff;border:none;
+    .sw .si{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:13px;color:#bbb;}
+    .sbtn{margin-top:6px;width:100%;padding:8px;background:#c8151b;color:#fff;border:none;
       border-radius:7px;font-size:12px;font-weight:800;cursor:pointer;}
     .sbtn:hover{background:#a0100f;}
     .sbtn:disabled{background:#ccc;cursor:not-allowed;}
-    .fc-grid{display:flex;flex-wrap:wrap;gap:5px;}
-    .chip{padding:4px 9px;border-radius:14px;font-size:11px;font-weight:700;cursor:pointer;
+    .fc-grid{display:flex;flex-wrap:wrap;gap:4px;}
+    .chip{padding:3px 8px;border-radius:12px;font-size:10.5px;font-weight:700;cursor:pointer;
       border:1.5px solid #ddd;color:#666;background:#fff;transition:all .15s;white-space:nowrap;}
     .chip.on{border-color:currentColor;}
-    .chip.c0{color:#c8151b;} .chip.c0.on{background:#fff0f0;}
-    .chip.c1{color:#1a6fdf;} .chip.c1.on{background:#eef4ff;}
-    .chip.c2{color:#e07b00;} .chip.c2.on{background:#fff5e0;}
-    .chip.c3{color:#1a9e52;} .chip.c3.on{background:#edfaf3;}
-    .chip.c4{color:#7b3fe4;} .chip.c4.on{background:#f4eeff;}
-    .chip.c5{color:#d4007a;} .chip.c5.on{background:#fff0f8;}
-    .chip.c6{color:#c07000;} .chip.c6.on{background:#fff8e6;}
-    .chip.c7{color:#e04000;} .chip.c7.on{background:#fff3ef;}
-    .chip.c8{color:#008080;} .chip.c8.on{background:#e6fafa;}
-    .chip.c9{color:#5a5a00;} .chip.c9.on{background:#fffbe6;}
-    .chip.c10{color:#777;}  .chip.c10.on{background:#f0f0f0;}
+    .chip.c0{color:#c8151b;}.chip.c0.on{background:#fff0f0;}
+    .chip.c1{color:#1a6fdf;}.chip.c1.on{background:#eef4ff;}
+    .chip.c2{color:#e07b00;}.chip.c2.on{background:#fff5e0;}
+    .chip.c3{color:#1a9e52;}.chip.c3.on{background:#edfaf3;}
+    .chip.c4{color:#7b3fe4;}.chip.c4.on{background:#f4eeff;}
+    .chip.c5{color:#d4007a;}.chip.c5.on{background:#fff0f8;}
+    .chip.c6{color:#c07000;}.chip.c6.on{background:#fff8e6;}
+    .chip.c7{color:#e04000;}.chip.c7.on{background:#fff3ef;}
+    .chip.c8{color:#008080;}.chip.c8.on{background:#e6fafa;}
+    .chip.c9{color:#5a5a00;}.chip.c9.on{background:#fffbe6;}
+    .chip.c10{color:#0066aa;}.chip.c10.on{background:#e6f0ff;}
+    .chip.c11{color:#6b3e00;}.chip.c11.on{background:#fff3e0;}
+    .chip.c12{color:#8b0057;}.chip.c12.on{background:#ffe6f5;}
+    .chip.c13{color:#004d40;}.chip.c13.on{background:#e0f5f2;}
+    .chip.c14{color:#37474f;}.chip.c14.on{background:#eceff1;}
+    .chip.cL{color:#777;}.chip.cL.on{background:#f0f0f0;}
+    .chip.cOF{color:#e65100;}.chip.cOF.on{background:#fff3e0;}
+    .chip.cFF{color:#bf360c;}.chip.cFF.on{background:#fce4da;}
     .sl-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
     .sl-row input[type=range]{flex:1;accent-color:#c8151b;}
     .sl-v{font-size:12px;font-weight:800;color:#c8151b;min-width:42px;text-align:right;}
     .score-block{background:#fff8f8;border-radius:9px;padding:10px 12px;}
-    .score-num{font-size:34px;font-weight:800;color:#c8151b;line-height:1;}
-    .score-num span{font-size:14px;color:#bbb;font-weight:400;}
-    .score-lbl{font-size:11px;color:#666;margin:3px 0 8px;}
-    .sbars{display:flex;flex-direction:column;gap:5px;}
+    .score-num{font-size:32px;font-weight:800;color:#c8151b;line-height:1;}
+    .score-num span{font-size:13px;color:#bbb;font-weight:400;}
+    .score-lbl{font-size:11px;color:#666;margin:3px 0 7px;}
+    .sbars{display:flex;flex-direction:column;gap:4px;}
     .sbar{display:flex;align-items:center;gap:5px;font-size:10px;}
-    .sbar-n{width:70px;color:#666;font-weight:700;}
+    .sbar-n{width:68px;color:#666;font-weight:700;}
     .sbar-t{flex:1;background:#eee;border-radius:3px;height:5px;overflow:hidden;}
     .sbar-f{height:100%;border-radius:3px;}
-    .sbar-v{width:24px;text-align:right;font-weight:800;color:#333;font-size:10px;}
-    .stg{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-    .stc{background:#f7f8fa;border-radius:7px;padding:8px 10px;}
-    .stc .val{font-size:16px;font-weight:800;color:#222;}
+    .sbar-v{width:22px;text-align:right;font-weight:800;color:#333;font-size:10px;}
+    .stg{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+    .stc{background:#f7f8fa;border-radius:7px;padding:7px 9px;}
+    .stc .val{font-size:15px;font-weight:800;color:#222;}
     .stc .unit{font-size:10px;color:#bbb;font-weight:400;}
     .stc .lbl{font-size:10px;color:#999;margin-top:1px;}
-    .stc.hl{background:#fff0f0;} .stc.hl .val{color:#c8151b;}
-    .btable{width:100%;border-collapse:collapse;font-size:11px;}
+    .stc.hl{background:#fff0f0;}.stc.hl .val{color:#c8151b;}
+    .btable{width:100%;border-collapse:collapse;font-size:10.5px;}
     .btable thead tr{background:#f7f8fa;}
-    .btable th{padding:5px 6px;text-align:left;color:#999;font-weight:700;border-bottom:1px solid #eee;}
-    .btable td{padding:5px 6px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
-    .bdot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px;flex-shrink:0;vertical-align:middle;}
-    .tag-g{background:#e6f9ee;color:#1a9e52;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;}
-    .tag-w{background:#fff4e0;color:#e07b00;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;}
-    .tag-b{background:#ffeaea;color:#c8151b;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;}
+    .btable th{padding:4px 5px;text-align:left;color:#999;font-weight:700;border-bottom:1px solid #eee;}
+    .btable td{padding:4px 5px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+    .bdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
+    .tag-g{background:#e6f9ee;color:#1a9e52;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:7px;}
+    .tag-w{background:#fff4e0;color:#e07b00;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:7px;}
+    .tag-b{background:#ffeaea;color:#c8151b;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:7px;}
     .rec-tag{display:inline-block;padding:4px 10px;border-radius:16px;font-size:11px;font-weight:800;}
     .map-area{flex:1;position:relative;}
     #kakaoMap{width:100%;height:100%;}
@@ -91,13 +98,13 @@ html
     .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:#555;}
     .legdot{width:9px;height:9px;border-radius:50%;}
     .status-inf{margin-left:auto;font-size:10px;color:#999;}
-    .rp{width:285px;min-width:285px;background:#fff;border-left:1px solid #e4e4e4;
+    .rp{width:288px;min-width:288px;background:#fff;border-left:1px solid #e4e4e4;
       display:flex;flex-direction:column;overflow-y:auto;z-index:10;}
     .rph{background:#c8151b;color:#fff;padding:12px 14px;font-size:13px;font-weight:800;
       display:flex;align-items:center;justify-content:space-between;}
-    .rps{padding:12px 14px;border-bottom:1px solid #f2f2f2;}
-    .rps h4{font-size:10px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
-    .cbars{display:flex;align-items:flex-end;gap:3px;height:64px;}
+    .rps{padding:11px 13px;border-bottom:1px solid #f2f2f2;}
+    .rps h4{font-size:10px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+    .cbars{display:flex;align-items:flex-end;gap:3px;height:60px;}
     .bc{flex:1;display:flex;flex-direction:column;align-items:center;}
     .bf{width:100%;border-radius:2px 2px 0 0;}
     .tl{display:flex;flex-direction:column;gap:5px;}
@@ -105,11 +112,11 @@ html
     .tld{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
     .tlt{flex:1;color:#444;line-height:1.4;}
     .tlm{font-size:9px;color:#ccc;white-space:nowrap;}
-    .acts{display:flex;flex-direction:column;gap:7px;padding:12px 14px;}
+    .acts{display:flex;flex-direction:column;gap:6px;padding:11px 13px;}
     .ab{padding:9px 12px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer;
       border:none;transition:all .15s;text-align:center;}
-    .ab.p{background:#c8151b;color:#fff;} .ab.p:hover{background:#a0100f;}
-    .ab.s{background:#f0f2f5;color:#333;} .ab.s:hover{background:#e2e5ea;}
+    .ab.p{background:#c8151b;color:#fff;}.ab.p:hover{background:#a0100f;}
+    .ab.s{background:#f0f2f5;color:#333;}.ab.s:hover{background:#e2e5ea;}
     .ab:disabled{opacity:.5;cursor:not-allowed;}
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-track{background:#f5f5f5;}
@@ -117,7 +124,7 @@ html
     .mov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;
       align-items:center;justify-content:center;z-index:1000;}
     .mov.show{display:flex;}
-    .mod{background:#fff;border-radius:12px;width:540px;max-width:95vw;
+    .mod{background:#fff;border-radius:12px;width:560px;max-width:95vw;
       box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;max-height:90vh;overflow-y:auto;}
     .modh{background:#c8151b;color:#fff;padding:14px 18px;font-size:14px;font-weight:800;
       display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2;}
@@ -125,7 +132,7 @@ html
     .modr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;
       border-bottom:1px solid #f5f5f5;font-size:12px;}
     .modr:last-of-type{border:none;}
-    .modr .mk2{color:#999;} .modr .mv{font-weight:800;}
+    .modr .mk2{color:#999;}.modr .mv{font-weight:800;}
     .mscore{text-align:center;padding:14px 0;}
     .mscore .mn{font-size:60px;font-weight:800;color:#c8151b;line-height:1;}
     .mscore .ms{font-size:13px;color:#bbb;}
@@ -133,6 +140,7 @@ html
     .mod-btable{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
     .mod-btable th{background:#f7f8fa;padding:6px 8px;text-align:left;color:#888;font-weight:700;border-bottom:2px solid #eee;}
     .mod-btable td{padding:6px 8px;border-bottom:1px solid #f5f5f5;}
+    .mod-section-title{font-size:11px;font-weight:800;color:#999;margin:14px 0 4px;padding-bottom:4px;border-bottom:2px solid #eee;}
     .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
       background:rgba(0,0,0,.75);color:#fff;padding:9px 20px;border-radius:20px;
       font-size:12px;font-weight:700;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none;}
@@ -141,13 +149,15 @@ html
       padding:12px 15px;min-width:200px;border-top:4px solid #c8151b;position:relative;}
     .iw-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid #f5f5f5;}
     .iw-row:last-child{border:none;}
-    .iw-k{color:#999;} .iw-v{font-weight:700;color:#222;max-width:130px;font-size:10px;text-align:right;}
+    .iw-k{color:#999;}.iw-v{font-weight:700;color:#222;max-width:130px;font-size:10px;text-align:right;}
+    .prog-bar-wrap{background:#f0f0f0;border-radius:4px;height:4px;margin-top:6px;overflow:hidden;}
+    .prog-bar-fill{height:100%;background:#c8151b;border-radius:4px;transition:width .3s;}
   </style>
 </head>
 <body>
 
 <nav class="navbar">
-  <div class="logo">🍗 교촌에프앤비 상권분석 툴</div>
+  <div class="logo">🍗 교촌에프앤비 상권분석 툴 <span style="font-size:10px;opacity:.7;font-weight:400;">v2.0</span></div>
   <div class="nav-right">
     <span class="badge" id="apiStatusBadge">API 로딩 중...</span>
     <span>📍 카카오맵 실시간 연동</span>
@@ -156,7 +166,7 @@ html
 
 <div class="main">
 
-<!-- LEFT SIDEBAR -->
+<!-- ===== LEFT SIDEBAR ===== -->
 <div class="sidebar">
   <div class="ss">
     <h3>지역 검색</h3>
@@ -165,22 +175,42 @@ html
       <input type="text" id="searchInput" placeholder="주소 또는 지역명 입력..." value="서울시 마포구 망원동"/>
     </div>
     <button class="sbtn" id="searchBtn" onclick="doSearch()" disabled>⏳ 지도 로딩 중...</button>
+    <div class="prog-bar-wrap" id="progWrap" style="display:none;">
+      <div class="prog-bar-fill" id="progFill" style="width:0%;"></div>
+    </div>
   </div>
 
   <div class="ss">
     <h3>브랜드 필터</h3>
-    <div class="fc-grid" id="filterChips">
-      <span class="chip c0 on" data-brand="kyochon"   onclick="toggleChip(this)">🍗 교촌</span>
-      <span class="chip c1 on" data-brand="bhc"        onclick="toggleChip(this)">🐔 bhc</span>
-      <span class="chip c2 on" data-brand="bbq"        onclick="toggleChip(this)">🍖 BBQ</span>
-      <span class="chip c3 on" data-brand="gupne"      onclick="toggleChip(this)">🌿 굽네</span>
-      <span class="chip c4 on" data-brand="puradak"    onclick="toggleChip(this)">🦆 푸라닭</span>
-      <span class="chip c5 on" data-brand="nene"       onclick="toggleChip(this)">🍺 네네</span>
-      <span class="chip c6 on" data-brand="sixty"      onclick="toggleChip(this)">6️⃣ 60계</span>
-      <span class="chip c7 on" data-brand="norang"     onclick="toggleChip(this)">🌻 노랑</span>
-      <span class="chip c8 on" data-brand="maxicana"   onclick="toggleChip(this)">🌶️ 맥시카나</span>
-      <span class="chip c9 on" data-brand="chogatjip"  onclick="toggleChip(this)">🏠 처갓집</span>
-      <span class="chip c10 on" data-brand="local"     onclick="toggleChip(this)">🏘️ 동네치킨</span>
+
+    <div class="ss-sub">▶ 치킨 프랜차이즈 TOP 15</div>
+    <div class="fc-grid" id="filterChipsChicken">
+      <span class="chip c0 on"  data-brand="kyochon"    onclick="toggleChip(this)">🍗 교촌</span>
+      <span class="chip c1 on"  data-brand="bhc"         onclick="toggleChip(this)">🐔 bhc</span>
+      <span class="chip c2 on"  data-brand="bbq"         onclick="toggleChip(this)">🍖 BBQ</span>
+      <span class="chip c3 on"  data-brand="gupne"       onclick="toggleChip(this)">🌿 굽네</span>
+      <span class="chip c4 on"  data-brand="puradak"     onclick="toggleChip(this)">🦆 푸라닭</span>
+      <span class="chip c5 on"  data-brand="nene"        onclick="toggleChip(this)">🍺 네네</span>
+      <span class="chip c6 on"  data-brand="sixty"       onclick="toggleChip(this)">6️⃣ 60계</span>
+      <span class="chip c7 on"  data-brand="norang"      onclick="toggleChip(this)">🌻 노랑통닭</span>
+      <span class="chip c8 on"  data-brand="maxicana"    onclick="toggleChip(this)">🌶️ 맥시카나</span>
+      <span class="chip c9 on"  data-brand="chogatjip"   onclick="toggleChip(this)">🏠 처갓집</span>
+      <span class="chip c10 on" data-brand="hosigi"      onclick="toggleChip(this)">👨 호식이</span>
+      <span class="chip c11 on" data-brand="perikana"    onclick="toggleChip(this)">🍗 페리카나</span>
+      <span class="chip c12 on" data-brand="jicoba"      onclick="toggleChip(this)">🔥 지코바</span>
+      <span class="chip c13 on" data-brand="jaudam"      onclick="toggleChip(this)">🌱 자담</span>
+      <span class="chip c14 on" data-brand="kkanboo"     onclick="toggleChip(this)">🦴 깐부</span>
+    </div>
+
+    <div class="ss-sub" style="margin-top:8px;">▶ 기타 치킨 프랜차이즈</div>
+    <div class="fc-grid">
+      <span class="chip cOF on" data-brand="otherChicken" onclick="toggleChip(this)">🍗 기타 치킨프랜차이즈</span>
+    </div>
+
+    <div class="ss-sub" style="margin-top:8px;">▶ 동네치킨 / 기타 외식</div>
+    <div class="fc-grid">
+      <span class="chip cL on"  data-brand="local"       onclick="toggleChip(this)">🏘️ 동네치킨</span>
+      <span class="chip cFF on" data-brand="fastfood"    onclick="toggleChip(this)">🍔 기타 프랜차이즈</span>
     </div>
   </div>
 
@@ -206,11 +236,11 @@ html
     <h3>주요 지표</h3>
     <div class="stg" id="keyStats">
       <div class="stc hl"><div class="val" id="statTotal">—</div><div class="lbl">전체 검색 장소</div></div>
-      <div class="stc">   <div class="val" id="statComp">—</div><div class="lbl">프랜차이즈 치킨</div></div>
+      <div class="stc">   <div class="val" id="statComp">—</div><div class="lbl">치킨 프랜차이즈</div></div>
       <div class="stc">   <div class="val" id="statKyochon">—</div><div class="lbl">교촌 기존점</div></div>
       <div class="stc">   <div class="val" id="statLocal">—</div><div class="lbl">동네치킨</div></div>
     </div>
-    <div style="margin-top:8px;">
+    <div style="margin-top:7px;">
       <div style="font-size:10px;color:#999;margin-bottom:3px;">출점 추천 유형</div>
       <span class="rec-tag tag-g" id="recTag">분석 전</span>
     </div>
@@ -227,11 +257,11 @@ html
   </div>
 </div>
 
-<!-- MAP -->
+<!-- ===== MAP ===== -->
 <div class="map-area">
   <div id="mapLoadingScreen" class="map-loading">
     <div class="spin"></div>
-    <div style="font-weight:800;">카카오맵 API 자동 로딩 중...</div>
+    <div style="font-weight:800;">카카오맵 API 로딩 중...</div>
     <div style="font-size:11px;color:#bbb;">잠시만 기다려 주세요</div>
   </div>
   <div id="kakaoMap"></div>
@@ -247,7 +277,7 @@ html
   </div>
 </div>
 
-<!-- RIGHT PANEL -->
+<!-- ===== RIGHT PANEL ===== -->
 <div class="rp">
   <div class="rph"><span>📊 실시간 분석 패널</span><span style="font-size:11px;opacity:.8;" id="rpArea">—</span></div>
 
@@ -264,7 +294,7 @@ html
 
   <div class="rps">
     <h4>검색된 장소 목록</h4>
-    <div id="placeList" style="max-height:160px;overflow-y:auto;">
+    <div id="placeList" style="max-height:170px;overflow-y:auto;">
       <div style="font-size:11px;color:#bbb;text-align:center;padding:10px;">분석 후 표시</div>
     </div>
   </div>
@@ -272,7 +302,7 @@ html
   <div class="rps">
     <h4>치킨 경쟁 현황 요약</h4>
     <div class="stg">
-      <div class="stc hl"><div class="val" id="rpFranchise">—</div><div class="lbl">프랜차이즈</div></div>
+      <div class="stc hl"><div class="val" id="rpFranchise">—</div><div class="lbl">치킨프랜차이즈</div></div>
       <div class="stc">   <div class="val" id="rpLocal">—</div><div class="lbl">동네치킨</div></div>
       <div class="stc">   <div class="val" id="rpTotal">—</div><div class="lbl">치킨집 합계</div></div>
       <div class="stc">   <div class="val" id="rpDist">—</div><div class="lbl">교촌 최근접</div></div>
@@ -299,7 +329,7 @@ html
 
 </div><!-- /main -->
 
-<!-- MODAL -->
+<!-- ===== MODAL ===== -->
 <div class="mov" id="modalOverlay" onclick="closeModal(event)">
   <div class="mod" onclick="event.stopPropagation()">
     <div class="modh">📄 상권분석 리포트
@@ -313,87 +343,71 @@ html
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  BRAND CONFIG
-// ═══════════════════════════════════════
-const BRANDS = [
-  {id:'kyochon',   name:'교촌치킨', kw:'교촌치킨',       color:'#c8151b', emoji:'🍗'},
-  {id:'bhc',       name:'bhc치킨',  kw:'bhc치킨',        color:'#1a6fdf', emoji:'🐔'},
-  {id:'bbq',       name:'BBQ치킨',  kw:'BBQ치킨',        color:'#e07b00', emoji:'🍖'},
-  {id:'gupne',     name:'굽네치킨', kw:'굽네치킨',       color:'#1a9e52', emoji:'🌿'},
-  {id:'puradak',   name:'푸라닭',   kw:'푸라닭',         color:'#7b3fe4', emoji:'🦆'},
-  {id:'nene',      name:'네네치킨', kw:'네네치킨',       color:'#d4007a', emoji:'🍺'},
-  {id:'sixty',     name:'60계치킨', kw:'60계치킨',       color:'#c07000', emoji:'6️⃣'},
-  {id:'norang',    name:'노랑통닭', kw:'노랑통닭',       color:'#e04000', emoji:'🌻'},
-  {id:'maxicana',  name:'맥시카나', kw:'맥시카나',       color:'#008080', emoji:'🌶️'},
-  {id:'chogatjip', name:'처갓집',   kw:'처갓집양념치킨', color:'#5a5a00', emoji:'🏠'},
-  {id:'local',     name:'동네치킨', kw:'치킨',           color:'#777',    emoji:'🏘️'},
-];
+// ══════════════════════════════════════════════════════════════
 
-// 프랜차이즈 필터링용 키워드 (동네치킨 제외용)
-const ALL_FRANCHISE_KEYWORDS = [
-  '교촌','bhc','비에이치씨','bbq','비비큐','굽네','푸라닭','네네','60계','육십계','노랑통닭','맥시카나',
-  '처갓집','호식이','페리카나','지코바','자담','깐부','바른치킨','순수치킨','땅땅','디디','멕시칸','또래오래',
-  '치킨매니아','치킨플러스','후라이드참잘하는집','후참','아웃닭','썬더치킨','치킨마루','부어치킨','오븐에빠진닭','오빠닭',
-  '맛닭꼬','깐풍기브라더스','다사랑','동근이','철인7호','컬투치킨','티바두마리','호치킨','훌랄라','가마로강정',
-  '만석닭강정','일미닭강정','단양흑마늘닭강정','속초해스호닭강정','신포닭강정','중앙닭강정','명품닭강정','맘스터치',
-  'KFC','kfc','롯데리아'
-];
+// 치킨 TOP 15 프랜차이즈
+const CHICKEN_TOP15 = [  {id:'kyochon',   name:'교촌치킨',  kw:'교촌치킨',       color:'#c8151b', emoji:'🍗', group:'chicken_top'},  {id:'bhc',       name:'bhc치킨',   kw:'bhc치킨',        color:'#1a6fdf', emoji:'🐔', group:'chicken_top'},  {id:'bbq',       name:'BBQ치킨',   kw:'BBQ치킨',        color:'#e07b00', emoji:'🍖', group:'chicken_top'},  {id:'gupne',     name:'굽네치킨',  kw:'굽네치킨',       color:'#1a9e52', emoji:'🌿', group:'chicken_top'},  {id:'puradak',   name:'푸라닭',    kw:'푸라닭',         color:'#7b3fe4', emoji:'🦆', group:'chicken_top'},  {id:'nene',      name:'네네치킨',  kw:'네네치킨',       color:'#d4007a', emoji:'🍺', group:'chicken_top'},  {id:'sixty',     name:'60계치킨',  kw:'60계치킨',       color:'#c07000', emoji:'6️⃣', group:'chicken_top'},  {id:'norang',    name:'노랑통닭',  kw:'노랑통닭',       color:'#e04000', emoji:'🌻', group:'chicken_top'},  {id:'maxicana',  name:'맥시카나',  kw:'맥시카나',       color:'#008080', emoji:'🌶️', group:'chicken_top'},  {id:'chogatjip', name:'처갓집',    kw:'처갓집양념치킨', color:'#5a5a00', emoji:'🏠', group:'chicken_top'},  {id:'hosigi',    name:'호식이두마리', kw:'호식이두마리치킨', color:'#0066aa', emoji:'👨', group:'chicken_top'},  {id:'perikana',  name:'페리카나',  kw:'페리카나',       color:'#6b3e00', emoji:'🍗', group:'chicken_top'},  {id:'jicoba',    name:'지코바',    kw:'지코바양념치킨', color:'#8b0057', emoji:'🔥', group:'chicken_top'},  {id:'jaudam',    name:'자담치킨',  kw:'자담치킨',       color:'#004d40', emoji:'🌱', group:'chicken_top'},  {id:'kkanboo',   name:'깐부치킨',  kw:'깐부치킨',       color:'#37474f', emoji:'🦴', group:'chicken_top'},];
 
-// ═══════════════════════════════════════
+// 기타 치킨 프랜차이즈 (검색 키워드 목록)
+const OTHER_CHICKEN_BRANDS = [  '멕시카나','땅땅치킨','티바두마리','동근이두마리','철인7호','컬투치킨','바른치킨','후라이드참잘하는집',  '또래오래','굽은치킨','오븐마루','꾸브라꼬','치킨플러스','가마로강정','맛닭꼬','훌랄라','보드람치킨',  '치킨마루','부어치킨','호치킨','누구나홀딱반한닭','60계','노랑통닭','다사랑치킨','치킨더홈',  '치킨매니아','코리엔탈깻잎','오븐에빠진닭','순살만공격','맘스터치','수원왕갈비통닭','또봉이통닭',  '치킨신드롬','봉이치킨','치킨인류','깐부치킨','푸라닭치킨','바비후치킨','짱닭치킨','노랑통닭',  '치킨678','두마리치킨','숯불두마리','숯불치킨'];
+
+// 기타 외식 프랜차이즈 (버거, 피자 등)
+const FASTFOOD_BRANDS = [  {name:'맥도날드',    kw:'맥도날드'},  {name:'버거킹',      kw:'버거킹'},  {name:'KFC',         kw:'KFC'},  {name:'롯데리아',    kw:'롯데리아'},  {name:'프랭크버거',  kw:'프랭크버거'},  {name:'맘스터치',    kw:'맘스터치'},  {name:'노브랜드버거',kw:'노브랜드버거'},  {name:'서브웨이',    kw:'서브웨이'},  {name:'피자헛',      kw:'피자헛'},  {name:'도미노피자',  kw:'도미노피자'},  {name:'미스터피자',  kw:'미스터피자'},  {name:'피자스쿨',    kw:'피자스쿨'},  {name:'반올림피자',  kw:'반올림피자'},  {name:'오구쌀피자',  kw:'오구쌀피자'},  {name:'청년피자',    kw:'청년피자'},  {name:'파파존스',    kw:'파파존스피자'},  {name:'피자알볼로',  kw:'피자알볼로'},  {name:'빽보이피자',  kw:'빽보이피자'},  {name:'7번가피자',   kw:'7번가피자'},  {name:'노모어피자',  kw:'노모어피자'},  {name:'피자에땅',    kw:'피자에땅'},  {name:'프레드피자',  kw:'프레드피자'},];
+
+// 모든 프랜차이즈 치킨 키워드 (동네치킨 필터링용)
+const ALL_FRANCHISE_KW = [  '교촌','bhc','비에이치씨','bbq','비비큐','굽네','푸라닭','네네','60계','육십계',  '노랑통닭','맥시카나','처갓집','호식이','페리카나','지코바','자담','깐부',  '바른치킨','땅땅치킨','또래오래','치킨매니아','치킨플러스','후라이드참잘하는집',  '오븐마루','치킨마루','부어치킨','맛닭꼬','가마로강정','훌랄라','보드람치킨',  '호치킨','티바두마리','코리엔탈','동근이','철인7호','컬투치킨','다사랑','꾸브라꼬',  '치킨더홈','누구나홀딱반한닭','치킨신드롬','봉이치킨','순살만공격','오븐에빠진닭',  '수원왕갈비','또봉이','짱닭','치킨678','맘스터치','kfc','롯데리아','맥도날드','버거킹',  '피자헛','도미노','미스터피자','피자스쿨','반올림피자','오구쌀','파파존스','피자알볼로',  '빽보이','7번가피자','노모어피자','피자에땅','프레드피자','노브랜드버거','서브웨이',  '프랭크버거','청년피자','두마리치킨','숯불치킨브랜드'];
+
+// 동네치킨 판별 키워드 (상호명 포함 여부)
+const LOCAL_CHICKEN_KEYWORDS = ['치킨','통닭','닭강정','닭발'];
+
+// ══════════════════════════════════════════════════════════════
 //  STATE
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 let map=null, ps=null, geocoder=null, circle=null, centerMarker=null, centerOverlay=null;
 let allOverlays=[], infoOverlay=null;
 let analysisData={}, currentCenter=null;
 let radius=1000, logCount=0;
+let totalBrandsToSearch=0, searchedCount=0;
 
-// ═══════════════════════════════════════
-//  AUTO-LOAD KAKAO MAP
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  KAKAO MAP LOAD
+// ══════════════════════════════════════════════════════════════
 (function loadKakao(){
-  const APP_KEY = '3ff2c2207296c1586aa791baeb974af6';
-  const script = document.createElement('script');
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${APP_KEY}&libraries=services&autoload=false`;
-  script.onload = () => {
-    kakao.maps.load(() => {
-      initMap();
-    });
-  };
-  script.onerror = () => {
-    document.getElementById('mapLoadingScreen').innerHTML =
+  const APP_KEY='3ff2c2207296c1586aa791baeb974af6';
+  const s=document.createElement('script');
+  s.src=`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${APP_KEY}&libraries=services&autoload=false`;
+  s.onload=()=>kakao.maps.load(initMap);
+  s.onerror=()=>{
+    document.getElementById('mapLoadingScreen').innerHTML=
       `<div style="font-size:32px;">❌</div>
        <div style="color:#c8151b;font-weight:800;">API 키 오류 또는 도메인 미등록</div>
-       <div style="font-size:11px;color:#999;margin-top:6px;">카카오 개발자센터에서<br>현재 도메인을 등록해주세요.</div>`;
+       <div style="font-size:11px;color:#999;margin-top:6px;">카카오 개발자센터에서 현재 도메인을 등록해주세요.</div>`;
   };
-  document.head.appendChild(script);
+  document.head.appendChild(s);
 })();
 
 function initMap(){
   document.getElementById('mapLoadingScreen').style.display='none';
   document.getElementById('mapControls').style.display='flex';
-  const btn = document.getElementById('searchBtn');
-  btn.disabled=false;
-  btn.textContent='상권 분석 시작';
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=false; btn.textContent='상권 분석 시작';
   document.getElementById('apiStatusBadge').textContent='✅ API 연결됨';
   document.getElementById('apiStatusBadge').style.cssText='background:#00c853;color:#fff;font-weight:800;font-size:10px;padding:2px 7px;border-radius:8px;';
 
-  const container=document.getElementById('kakaoMap');
-  map = new kakao.maps.Map(container,{
-    center: new kakao.maps.LatLng(37.5563,126.9094),
-    level: 4
+  map=new kakao.maps.Map(document.getElementById('kakaoMap'),{
+    center:new kakao.maps.LatLng(37.5563,126.9094), level:4
   });
-  ps = new kakao.maps.services.Places();
-  geocoder = new kakao.maps.services.Geocoder();
+  ps=new kakao.maps.services.Places();
+  geocoder=new kakao.maps.services.Geocoder();
 
-  kakao.maps.event.addListener(map,'click',function(me){
-    const ll=me.latLng;
-    moveCenterTo(ll.getLat(),ll.getLng(),'지도 클릭');
+  kakao.maps.event.addListener(map,'click',me=>{
+    moveCenterTo(me.latLng.getLat(),me.latLng.getLng(),'지도 클릭');
   });
-  kakao.maps.event.addListener(map,'dragend',function(){
+  kakao.maps.event.addListener(map,'dragend',()=>{
     const c=map.getCenter();
-    document.getElementById('coordInfo').textContent=
-      `중심: ${c.getLat().toFixed(5)}, ${c.getLng().toFixed(5)}`;
+    document.getElementById('coordInfo').textContent=`중심: ${c.getLat().toFixed(5)}, ${c.getLng().toFixed(5)}`;
   });
 
   addLog('✅ 카카오맵 초기화 완료','#1a9e52');
@@ -401,19 +415,19 @@ function initMap(){
   doSearch();
 }
 
-// ═══════════════════════════════════════
-//  SEARCH
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  SEARCH / GEOCODE
+// ══════════════════════════════════════════════════════════════
 function doSearch(){
   if(!map){showToast('⚠️ 지도 로딩 중입니다.');return;}
   const q=document.getElementById('searchInput').value.trim();
   if(!q){showToast('❗ 검색어를 입력하세요.');return;}
   setStatus('🔍 주소 변환 중...');
-  geocoder.addressSearch(q,function(res,st){
+  geocoder.addressSearch(q,(res,st)=>{
     if(st===kakao.maps.services.Status.OK){
       moveCenterTo(parseFloat(res[0].y),parseFloat(res[0].x),q);
     } else {
-      ps.keywordSearch(q,function(data,s2){
+      ps.keywordSearch(q,(data,s2)=>{
         if(s2===kakao.maps.services.Status.OK&&data.length>0){
           moveCenterTo(parseFloat(data[0].y),parseFloat(data[0].x),q);
         } else {
@@ -428,27 +442,22 @@ function doSearch(){
 function moveCenterTo(lat,lng,label){
   currentCenter={lat,lng};
   const ll=new kakao.maps.LatLng(lat,lng);
-  map.setCenter(ll);
-  map.setLevel(4);
+  map.setCenter(ll); map.setLevel(4);
 
   if(centerMarker) centerMarker.setMap(null);
   if(centerOverlay) centerOverlay.setMap(null);
-
   centerMarker=new kakao.maps.Marker({position:ll,map,zIndex:10});
   centerOverlay=new kakao.maps.CustomOverlay({
     position:ll,
-    content:`<div style="background:#c8151b;color:#fff;padding:3px 9px;border-radius:12px;
-              font-size:11px;font-weight:800;margin-top:4px;white-space:nowrap;
-              box-shadow:0 2px 6px rgba(0,0,0,.3);">📍 ${label||'분석 중심'}</div>`,
-    yAnchor:-0.2, zIndex:11
+    content:`<div style="background:#c8151b;color:#fff;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:800;margin-top:4px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);">📍 ${label||'분석 중심'}</div>`,
+    yAnchor:-0.2,zIndex:11
   });
   centerOverlay.setMap(map);
 
   if(circle) circle.setMap(null);
   circle=new kakao.maps.Circle({
-    center:ll, radius,
-    strokeWeight:2, strokeColor:'#c8151b', strokeOpacity:.7, strokeStyle:'dashed',
-    fillColor:'#c8151b', fillOpacity:.05
+    center:ll,radius,strokeWeight:2,strokeColor:'#c8151b',strokeOpacity:.7,strokeStyle:'dashed',
+    fillColor:'#c8151b',fillOpacity:.05
   });
   circle.setMap(map);
 
@@ -458,76 +467,170 @@ function moveCenterTo(lat,lng,label){
   runAnalysis();
 }
 
-// ═══════════════════════════════════════
-//  ANALYSIS
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  ANALYSIS ENGINE
+// ══════════════════════════════════════════════════════════════
+function getActiveChipBrands(){
+  return [...document.querySelectorAll('.chip.on')].map(c=>c.dataset.brand);
+}
+
+function buildSearchQueue(activeIds){
+  const queue=[];
+
+  // TOP 15 치킨 브랜드
+  CHICKEN_TOP15.forEach(b=>{
+    if(activeIds.includes(b.id)) queue.push({type:'single', brand:b});
+  });
+
+  // 기타 치킨 프랜차이즈
+  if(activeIds.includes('otherChicken')){
+    OTHER_CHICKEN_BRANDS.forEach(kw=>{
+      queue.push({
+        type:'other_chicken', kw,
+        brandDef:{id:'otherChicken',name:'기타치킨프랜차이즈',color:'#e65100',emoji:'🍗',group:'other_chicken'}
+      });
+    });
+  }
+
+  // 동네치킨 (키워드: 치킨, 통닭, 닭강정, 닭발)
+  if(activeIds.includes('local')){
+    LOCAL_CHICKEN_KEYWORDS.forEach(kw=>{
+      queue.push({
+        type:'local', kw,
+        brandDef:{id:'local',name:'동네치킨',color:'#777',emoji:'🏘️',group:'local'}
+      });
+    });
+  }
+
+  // 기타 프랜차이즈 (버거/피자 등)
+  if(activeIds.includes('fastfood')){
+    FASTFOOD_BRANDS.forEach(ff=>{
+      queue.push({
+        type:'fastfood', kw:ff.kw, ffName:ff.name,
+        brandDef:{id:'fastfood',name:'기타프랜차이즈',color:'#bf360c',emoji:'🍔',group:'fastfood'}
+      });
+    });
+  }
+
+  return queue;
+}
+
 function runAnalysis(){
   if(!currentCenter) return;
   clearMarkers();
-  analysisData={};
+  analysisData={
+    otherChicken:[], local:[], fastfood:[]
+  };
+  CHICKEN_TOP15.forEach(b=>{ analysisData[b.id]=[]; });
+
   document.getElementById('searchBtn').disabled=true;
   document.getElementById('reportBtn').disabled=true;
   document.getElementById('placeList').innerHTML='';
 
-  const activeIds=[...document.querySelectorAll('#filterChips .chip.on')].map(c=>c.dataset.brand);
-  const activeBrands=BRANDS.filter(b=>activeIds.includes(b.id));
-  let idx=0;
+  const activeIds=getActiveChipBrands();
+  const queue=buildSearchQueue(activeIds);
+  totalBrandsToSearch=queue.length;
+  searchedCount=0;
 
+  const pw=document.getElementById('progWrap');
+  const pf=document.getElementById('progFill');
+  pw.style.display='block'; pf.style.width='0%';
+
+  // 중복 방지용 place_url Set
+  const seenPlaces={};
+  CHICKEN_TOP15.forEach(b=>{ seenPlaces[b.id]=new Set(); });
+  seenPlaces['otherChicken']=new Set();
+  seenPlaces['local']=new Set();
+  seenPlaces['fastfood']=new Set();
+
+  let idx=0;
   function next(){
-    if(idx>=activeBrands.length){
+    if(idx>=queue.length){
+      // 마무리
       document.getElementById('searchBtn').disabled=false;
       document.getElementById('reportBtn').disabled=false;
+      pw.style.display='none';
+      buildPlaceList();
       computeScore();
       updateBrandTable();
       updateLegend();
-      setStatus(`✅ 분석 완료 — ${Object.values(analysisData).flat().length}개 장소 검색됨`);
-      addLog(`✅ 분석 완료 (총 ${Object.values(analysisData).flat().length}개)`,'#1a9e52');
+      const totalFound=countAllPlaces();
+      setStatus(`✅ 분석 완료 — 총 ${totalFound}개 장소 검색됨`);
+      addLog(`✅ 분석 완료 (총 ${totalFound}개)`,'#1a9e52');
       return;
     }
-    const brand=activeBrands[idx++];
-    setStatus(`🔍 "${brand.name}" 검색 중... (${idx}/${activeBrands.length})`);
 
-    ps.keywordSearch(brand.kw, function(data,st){
-      let results=[];
+    const item=queue[idx++];
+    searchedCount++;
+    const pct=Math.round((searchedCount/totalBrandsToSearch)*100);
+    pf.style.width=pct+'%';
+
+    let searchKw, displayLabel;
+    if(item.type==='single'){
+      searchKw=item.brand.kw;
+      displayLabel=item.brand.name;
+    } else {
+      searchKw=item.kw;
+      displayLabel=`${item.brandDef.name}(${item.kw})`;
+    }
+    setStatus(`🔍 "${displayLabel}" 검색 중... (${searchedCount}/${totalBrandsToSearch})`);
+
+    ps.keywordSearch(searchKw,(data,st)=>{
       if(st===kakao.maps.services.Status.OK){
-        results=data.filter(p=>{
+        data.forEach(p=>{
           const d=getDist(currentCenter.lat,currentCenter.lng,parseFloat(p.y),parseFloat(p.x));
-          return d<=radius;
+          if(d>radius) return;
+
+          const pname=p.place_name;
+          const pnameLow=pname.toLowerCase().replace(/\s/g,'');
+          const key=p.place_url||pname+'_'+p.x+'_'+p.y;
+
+          if(item.type==='single'){
+            const bid=item.brand.id;
+            if(seenPlaces[bid].has(key)) return;
+            seenPlaces[bid].add(key);
+            const placeObj=makePlaceObj(p,d);
+            analysisData[bid].push(placeObj);
+            addBrandMarker(item.brand,placeObj);
+          }
+          else if(item.type==='other_chicken'){
+            // 반드시 프랜차이즈 키워드 포함 && TOP15 아닌 것
+            const isFranchise=ALL_FRANCHISE_KW.some(fk=>pnameLow.includes(fk.toLowerCase()));
+            const isTop15=CHICKEN_TOP15.some(b=>pnameLow.includes(b.kw.toLowerCase().replace(/\s/g,'')));
+            if(!isFranchise||isTop15) return;
+            if(seenPlaces['otherChicken'].has(key)) return;
+            seenPlaces['otherChicken'].add(key);
+            const placeObj=makePlaceObj(p,d);
+            analysisData['otherChicken'].push(placeObj);
+            addBrandMarker(item.brandDef,placeObj);
+          }
+          else if(item.type==='local'){
+            // 상호명에 치킨/통닭/닭강정/닭 포함 && 프랜차이즈 키워드 없어야 함 && 피자 메인 아닌 것
+            const hasChickenWord=LOCAL_CHICKEN_KEYWORDS.some(lk=>pnameLow.includes(lk));
+            if(!hasChickenWord) return;
+            const isFranchise=ALL_FRANCHISE_KW.some(fk=>pnameLow.includes(fk.toLowerCase()));
+            if(isFranchise) return;
+            // 피자 메인 업소 제외
+            const isPizzaMain=['피자','pizza'].some(pk=>pnameLow.startsWith(pk))||
+              (['피자','pizza'].some(pk=>pnameLow.includes(pk))&&
+               !LOCAL_CHICKEN_KEYWORDS.some(lk=>pnameLow.replace(/피자/g,'').includes(lk)));
+            if(isPizzaMain) return;
+            if(seenPlaces['local'].has(key)) return;
+            seenPlaces['local'].add(key);
+            const placeObj=makePlaceObj(p,d);
+            analysisData['local'].push(placeObj);
+            addBrandMarker(item.brandDef,placeObj);
+          }
+          else if(item.type==='fastfood'){
+            if(seenPlaces['fastfood'].has(key)) return;
+            seenPlaces['fastfood'].add(key);
+            const placeObj={...makePlaceObj(p,d), ffBrand:item.ffName};
+            analysisData['fastfood'].push(placeObj);
+            addBrandMarker(item.brandDef,placeObj);
+          }
         });
-        
-        // 동네치킨 필터링 강화
-        if(brand.id==='local'){
-          results = results.filter(p => {
-            const pname = p.place_name.toLowerCase().replace(/\s/g, '');
-            // 프랜차이즈 키워드가 하나라도 포함되어 있으면 제외
-            return !ALL_FRANCHISE_KEYWORDS.some(fk => pname.includes(fk.toLowerCase()));
-          });
-        }
       }
-      
-      analysisData[brand.id]=results.map(p=>({
-        name:p.place_name, address:p.address_name||'—',
-        phone:p.phone||'—', url:p.place_url||'',
-        lat:parseFloat(p.y), lng:parseFloat(p.x),
-        distance:Math.round(getDist(currentCenter.lat,currentCenter.lng,parseFloat(p.y),parseFloat(p.x)))
-      }));
-
-      // 마커 표시
-      analysisData[brand.id].forEach(p=>addBrandMarker(brand,p));
-
-      // place list
-      analysisData[brand.id].forEach(p=>{
-        const li=document.createElement('div');
-        li.style.cssText='display:flex;align-items:center;gap:6px;padding:4px 2px;border-bottom:1px solid #f5f5f5;cursor:pointer;font-size:11px;';
-        li.innerHTML=`<span style="font-size:14px;">${brand.emoji}</span>
-          <span style="flex:1;font-weight:700;">${p.name}</span>
-          <span style="color:#bbb;">${p.distance}m</span>`;
-        li.onclick=()=>map.setCenter(new kakao.maps.LatLng(p.lat,p.lng));
-        document.getElementById('placeList').appendChild(li);
-      });
-
-      addLog(`${brand.emoji} ${brand.name}: ${analysisData[brand.id].length}개 발견`, brand.color);
-      setTimeout(next,300);
+      setTimeout(next, 250);
     },{
       location:new kakao.maps.LatLng(currentCenter.lat,currentCenter.lng),
       radius, sort:kakao.maps.services.SortBy.DISTANCE,
@@ -537,19 +640,32 @@ function runAnalysis(){
   next();
 }
 
-// ═══════════════════════════════════════
+function makePlaceObj(p,d){
+  return {
+    name:p.place_name, address:p.address_name||'—',
+    phone:p.phone||'—', url:p.place_url||'',
+    lat:parseFloat(p.y), lng:parseFloat(p.x),
+    distance:Math.round(d)
+  };
+}
+
+function countAllPlaces(){
+  return Object.values(analysisData).reduce((s,v)=>s+v.length,0);
+}
+
+// ══════════════════════════════════════════════════════════════
 //  MARKERS
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function addBrandMarker(brand,place){
   const pos=new kakao.maps.LatLng(place.lat,place.lng);
-  const id=encodeURIComponent(place.name+place.lng+place.lat);
+  const id=encodeURIComponent(brand.id+'_'+place.name+'_'+place.lng+'_'+place.lat);
   const content=`
     <div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;"
          onclick="markerClick('${id}')">
-      <div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+      <div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
                   background:${brand.color};display:flex;align-items:center;justify-content:center;
                   box-shadow:0 2px 7px rgba(0,0,0,.3);">
-        <span style="transform:rotate(45deg);font-size:12px;">${brand.emoji}</span>
+        <span style="transform:rotate(45deg);font-size:11px;">${brand.emoji}</span>
       </div>
       <div style="background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:700;
                   padding:2px 5px;border-radius:3px;margin-top:2px;white-space:nowrap;
@@ -568,6 +684,7 @@ function markerClick(id){
   const p=found.place, b=found.brand;
   if(infoOverlay) infoOverlay.setMap(null);
   const pos=new kakao.maps.LatLng(p.lat,p.lng);
+  const ffLabel=p.ffBrand?`<div class="iw-row"><span class="iw-k">서브브랜드</span><span class="iw-v">${p.ffBrand}</span></div>`:'';
   infoOverlay=new kakao.maps.CustomOverlay({
     position:pos,
     content:`<div class="info-wrap" style="border-top-color:${b.color};">
@@ -577,67 +694,102 @@ function markerClick(id){
       <div class="iw-row"><span class="iw-k">주소</span><span class="iw-v">${p.address||'—'}</span></div>
       <div class="iw-row"><span class="iw-k">거리</span><span class="iw-v">${p.distance}m</span></div>
       <div class="iw-row"><span class="iw-k">전화</span><span class="iw-v">${p.phone||'—'}</span></div>
-      <div class="iw-row"><span class="iw-k">브랜드</span><span class="iw-v" style="color:${b.color};">${b.name}</span></div>
+      ${ffLabel}
+      <div class="iw-row"><span class="iw-k">분류</span><span class="iw-v" style="color:${b.color};">${b.name}</span></div>
       ${p.url?`<a href="${p.url}" target="_blank"
         style="display:block;margin-top:8px;background:${b.color};color:#fff;text-align:center;
                padding:5px;border-radius:5px;font-size:11px;font-weight:700;text-decoration:none;">
         카카오맵에서 보기 →</a>`:''}
     </div>`,
-    yAnchor:1.25, zIndex:20
+    yAnchor:1.25,zIndex:20
   });
   window._iov=infoOverlay;
   infoOverlay.setMap(map);
 }
 
-// ═══════════════════════════════════════
-//  SCORE
-// ═══════════════════════════════════════
-function computeScore(){
-  const kyochonCnt=(analysisData['kyochon']||[]).length;
-  const localCnt=(analysisData['local']||[]).length;
-  const franchiseCnt=Object.entries(analysisData)
-    .filter(([id])=>id!=='kyochon'&&id!=='local')
-    .reduce((s,[,v])=>s+v.length,0);
+// ══════════════════════════════════════════════════════════════
+//  PLACE LIST
+// ══════════════════════════════════════════════════════════════
+function buildPlaceList(){
+  const pl=document.getElementById('placeList');
+  pl.innerHTML='';
 
-  let compSc  = Math.max(0,25-franchiseCnt*2);
-  let kyoSc   = Math.max(0,15-kyochonCnt*5);
-  let denSc   = Math.min(20,Math.round(radius/100));
-  let localSc = Math.max(0,15-localCnt);
-  let accSc   = 15;
-  let total   = Math.min(100,Math.max(0,compSc+kyoSc+denSc+localSc+accSc));
+  // TOP15
+  CHICKEN_TOP15.forEach(b=>{
+    (analysisData[b.id]||[]).forEach(p=>{
+      pl.appendChild(makePlaceListItem(b.emoji,b.color,p.name,p.distance,p.lat,p.lng));
+    });
+  });
+  // otherChicken
+  (analysisData['otherChicken']||[]).forEach(p=>{
+    pl.appendChild(makePlaceListItem('🍗','#e65100',p.name,p.distance,p.lat,p.lng));
+  });
+  // local
+  (analysisData['local']||[]).forEach(p=>{
+    pl.appendChild(makePlaceListItem('🏘️','#777',p.name,p.distance,p.lat,p.lng));
+  });
+  // fastfood
+  (analysisData['fastfood']||[]).forEach(p=>{
+    pl.appendChild(makePlaceListItem('🍔','#bf360c',p.name+(p.ffBrand?` (${p.ffBrand})`:''),p.distance,p.lat,p.lng));
+  });
+
+  if(pl.children.length===0){
+    pl.innerHTML='<div style="font-size:11px;color:#bbb;text-align:center;padding:10px;">검색 결과 없음</div>';
+  }
+}
+
+function makePlaceListItem(emoji,color,name,dist,lat,lng){
+  const li=document.createElement('div');
+  li.style.cssText='display:flex;align-items:center;gap:5px;padding:3px 1px;border-bottom:1px solid #f5f5f5;cursor:pointer;font-size:10.5px;';
+  li.innerHTML=`<span style="font-size:13px;">${emoji}</span>
+    <span style="flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
+    <span style="color:#bbb;flex-shrink:0;">${dist}m</span>`;
+  li.onclick=()=>map.setCenter(new kakao.maps.LatLng(lat,lng));
+  return li;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SCORE
+// ══════════════════════════════════════════════════════════════
+function computeScore(){
+  const kyoCnt=(analysisData['kyochon']||[]).length;
+  const localCnt=(analysisData['local']||[]).length;
+  const otherCkCnt=(analysisData['otherChicken']||[]).length;
+  const top15Cnt=CHICKEN_TOP15.filter(b=>b.id!=='kyochon')
+    .reduce((s,b)=>s+(analysisData[b.id]||[]).length,0);
+  const franchiseCnt=top15Cnt+otherCkCnt;
+  const fastfoodCnt=(analysisData['fastfood']||[]).length;
+
+  const compSc  = Math.max(0, 25 - franchiseCnt * 2);
+  const kyoSc   = Math.max(0, 15 - kyoCnt * 5);
+  const denSc   = Math.min(20, Math.round(radius / 100));
+  const localSc = Math.max(0, 15 - localCnt);
+  const accSc   = 15;
+  const total   = Math.min(100, Math.max(0, compSc + kyoSc + denSc + localSc + accSc));
 
   document.getElementById('scoreBig').innerHTML=`${total}<span>/100</span>`;
-  let lbl,recHtml;
-  if(total>=70){lbl='✅ 출점 추천';recHtml='<span class="rec-tag tag-g">✅ 표준형 적합</span>';}
-  else if(total>=50){lbl='⚠️ 조건부 검토';recHtml='<span class="rec-tag tag-w">⚠️ 소형 매장 검토</span>';}
-  else{lbl='❌ 출점 비권장';recHtml='<span class="rec-tag tag-b">❌ 재검토 필요</span>';}
+  let lbl, recHtml;
+  if(total>=70){ lbl='✅ 출점 추천'; recHtml='<span class="rec-tag tag-g">✅ 표준형 적합</span>'; }
+  else if(total>=50){ lbl='⚠️ 조건부 검토'; recHtml='<span class="rec-tag tag-w">⚠️ 소형 매장 검토</span>'; }
+  else { lbl='❌ 출점 비권장'; recHtml='<span class="rec-tag tag-b">❌ 재검토 필요</span>'; }
   document.getElementById('scoreLbl').textContent=lbl;
   document.getElementById('recTag').outerHTML=recHtml;
 
-  const bars=[
-    {name:'경쟁밀집도',val:compSc, max:25,color:'#e07b00'},
-    {name:'교촌중복',  val:kyoSc,  max:15,color:'#c8151b'},
-    {name:'반경점수',  val:denSc,  max:20,color:'#1a6fdf'},
-    {name:'동네치킨',  val:localSc,max:15,color:'#1a9e52'},
-    {name:'접근성',    val:accSc,  max:15,color:'#7b3fe4'},
-  ];
-  document.getElementById('scoreBars').innerHTML=bars.map(b=>
-    `<div class="sbar">
-       <div class="sbar-n">${b.name}</div>
-       <div class="sbar-t"><div class="sbar-f" style="width:${Math.round(b.val/b.max*100)}%;background:${b.color};"></div></div>
-       <div class="sbar-v">${b.val}</div>
-     </div>`
-  ).join('');
+  document.getElementById('scoreBars').innerHTML=[    {name:'경쟁밀집도', val:compSc,  max:25, color:'#e07b00'},    {name:'교촌중복',   val:kyoSc,   max:15, color:'#c8151b'},    {name:'반경점수',   val:denSc,   max:20, color:'#1a6fdf'},    {name:'동네치킨',   val:localSc, max:15, color:'#1a9e52'},    {name:'접근성',     val:accSc,   max:15, color:'#7b3fe4'},  ].map(b=>`<div class="sbar">
+    <div class="sbar-n">${b.name}</div>
+    <div class="sbar-t"><div class="sbar-f" style="width:${Math.round(b.val/b.max*100)}%;background:${b.color};"></div></div>
+    <div class="sbar-v">${b.val}</div>
+  </div>`).join('');
 
-  const totalAll=Object.values(analysisData).flat().length;
+  const totalAll=countAllPlaces();
   document.getElementById('statTotal').innerHTML=`${totalAll}<span class="unit"> 개</span>`;
   document.getElementById('statComp').innerHTML=`${franchiseCnt}<span class="unit"> 개</span>`;
-  document.getElementById('statKyochon').innerHTML=`${kyochonCnt}<span class="unit"> 개</span>`;
+  document.getElementById('statKyochon').innerHTML=`${kyoCnt}<span class="unit"> 개</span>`;
   document.getElementById('statLocal').innerHTML=`${localCnt}<span class="unit"> 개</span>`;
 
   document.getElementById('rpFranchise').innerHTML=`${franchiseCnt}<span class="unit"> 개</span>`;
   document.getElementById('rpLocal').innerHTML=`${localCnt}<span class="unit"> 개</span>`;
-  document.getElementById('rpTotal').innerHTML=`${franchiseCnt+localCnt+kyochonCnt}<span class="unit"> 개</span>`;
+  document.getElementById('rpTotal').innerHTML=`${franchiseCnt+localCnt+kyoCnt}<span class="unit"> 개</span>`;
 
   const kyoList=analysisData['kyochon']||[];
   if(kyoList.length>0){
@@ -650,14 +802,28 @@ function computeScore(){
 
 function updateBrandTable(){
   const tb=document.getElementById('brandTableBody');
-  const rows=BRANDS.filter(b=>analysisData[b.id]!==undefined);
-  if(!rows.length){tb.innerHTML='<tr><td colspan="3" style="color:#bbb;text-align:center;padding:8px;">데이터 없음</td></tr>';return;}
-  tb.innerHTML=rows.map(b=>{
+  const rows=[];
+
+  // TOP15
+  CHICKEN_TOP15.forEach(b=>{
     const cnt=(analysisData[b.id]||[]).length;
-    const thr=cnt===0?'<span class="tag-g">없음</span>':cnt<=1?'<span class="tag-w">보통</span>':'<span class="tag-b">높음</span>';
+    rows.push({color:b.color, name:b.name, cnt});
+  });
+  // 기타치킨
+  const ocCnt=(analysisData['otherChicken']||[]).length;
+  rows.push({color:'#e65100', name:'기타치킨프랜차이즈', cnt:ocCnt});
+  // 동네치킨
+  const lcCnt=(analysisData['local']||[]).length;
+  rows.push({color:'#777', name:'동네치킨', cnt:lcCnt});
+  // 기타외식
+  const ffCnt=(analysisData['fastfood']||[]).length;
+  rows.push({color:'#bf360c', name:'기타프랜차이즈', cnt:ffCnt});
+
+  tb.innerHTML=rows.map(r=>{
+    const thr=r.cnt===0?'<span class="tag-g">없음</span>':r.cnt<=2?'<span class="tag-w">보통</span>':'<span class="tag-b">높음</span>';
     return `<tr>
-      <td><span class="bdot" style="background:${b.color};"></span>${b.name}</td>
-      <td style="font-weight:800;">${cnt}</td>
+      <td><span class="bdot" style="background:${r.color};"></span>${r.name}</td>
+      <td style="font-weight:800;">${r.cnt}</td>
       <td>${thr}</td>
     </tr>`;
   }).join('');
@@ -666,17 +832,21 @@ function updateBrandTable(){
 function updateLegend(){
   const sb=document.getElementById('statusbar');
   let h=`<span style="font-size:11px;color:#555;font-weight:700;" id="statusMsg">✅ 분석 완료</span>`;
-  BRANDS.forEach(b=>{
-    const cnt=(analysisData[b.id]||[]).length;
-    if(cnt>0) h+=`<div class="leg"><div class="legdot" style="background:${b.color};"></div>${b.name}(${cnt})</div>`;
+  const groups=[    ...CHICKEN_TOP15.map(b=>({color:b.color,name:b.name,cnt:(analysisData[b.id]||[]).length})),
+    {color:'#e65100',name:'기타치킨',cnt:(analysisData['otherChicken']||[]).length},
+    {color:'#777',   name:'동네치킨',cnt:(analysisData['local']||[]).length},
+    {color:'#bf360c',name:'기타프랜차이즈',cnt:(analysisData['fastfood']||[]).length},
+  ];
+  groups.forEach(g=>{
+    if(g.cnt>0) h+=`<div class="leg"><div class="legdot" style="background:${g.color};"></div>${g.name}(${g.cnt})</div>`;
   });
   h+=`<span class="status-inf" id="coordInfo">${document.getElementById('coordInfo').textContent}</span>`;
   sb.innerHTML=h;
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  HELPERS
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function getDist(la1,ln1,la2,ln2){
   const R=6371000,d1=(la2-la1)*Math.PI/180,d2=(ln2-ln1)*Math.PI/180;
   const a=Math.sin(d1/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(d2/2)**2;
@@ -715,8 +885,8 @@ function onRadiusChange(v){
   document.getElementById('radiusVal').textContent=(v/1000).toFixed(1)+'km';
   if(circle&&currentCenter) circle.setRadius(radius);
 }
-function toggleChip(el){el.classList.toggle('on');}
-function setStatus(msg){const e=document.getElementById('statusMsg');if(e)e.textContent=msg;}
+function toggleChip(el){ el.classList.toggle('on'); }
+function setStatus(msg){ const e=document.getElementById('statusMsg'); if(e) e.textContent=msg; }
 function addLog(msg,color){
   const tl=document.getElementById('analysisLog');
   if(logCount===0) tl.innerHTML='';
@@ -744,31 +914,43 @@ function switchMapType(type,el){
   else map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
 }
 
-// ═══════════════════════════════════════
-//  CSV
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  CSV EXPORT
+// ══════════════════════════════════════════════════════════════
 function exportCSV(){
   if(!Object.keys(analysisData).length){showToast('❗ 먼저 분석을 실행하세요.');return;}
-  let csv='\uFEFF브랜드,장소명,주소,전화번호,거리(m)\n';
-  BRANDS.forEach(b=>{
+  let csv='\uFEFF분류,브랜드,장소명,주소,전화번호,거리(m)\n';
+  CHICKEN_TOP15.forEach(b=>{
     (analysisData[b.id]||[]).forEach(p=>{
-      csv+=`${b.name},"${p.name}","${p.address}","${p.phone}",${p.distance}\n`;
+      csv+=`치킨TOP15,${b.name},"${p.name}","${p.address}","${p.phone}",${p.distance}\n`;
     });
+  });
+  (analysisData['otherChicken']||[]).forEach(p=>{
+    csv+=`기타치킨프랜차이즈,기타치킨프랜차이즈,"${p.name}","${p.address}","${p.phone}",${p.distance}\n`;
+  });
+  (analysisData['local']||[]).forEach(p=>{
+    csv+=`동네치킨,동네치킨,"${p.name}","${p.address}","${p.phone}",${p.distance}\n`;
+  });
+  (analysisData['fastfood']||[]).forEach(p=>{
+    csv+=`기타프랜차이즈,${p.ffBrand||'기타'},"${p.name}","${p.address}","${p.phone}",${p.distance}\n`;
   });
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`교촌상권분석_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download=`교촌상권분석v2_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   showToast('📤 CSV 다운로드 완료!');
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  MODAL
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function showModal(){
   const kyoCnt=(analysisData['kyochon']||[]).length;
   const localCnt=(analysisData['local']||[]).length;
-  const franCnt=Object.entries(analysisData).filter(([id])=>id!=='kyochon'&&id!=='local').reduce((s,[,v])=>s+v.length,0);
+  const otherCkCnt=(analysisData['otherChicken']||[]).length;
+  const ffCnt=(analysisData['fastfood']||[]).length;
+  const top15Cnt=CHICKEN_TOP15.filter(b=>b.id!=='kyochon').reduce((s,b)=>s+(analysisData[b.id]||[]).length,0);
+  const franCnt=top15Cnt+otherCkCnt;
   const scoreText=document.getElementById('scoreBig').textContent.replace('/100','').trim();
   const score=parseInt(scoreText)||0;
   const q=document.getElementById('searchInput').value.trim();
@@ -776,17 +958,14 @@ function showModal(){
            :score>=50?'<span class="rec-tag tag-w">⚠️ 조건부 검토</span>'
            :'<span class="rec-tag tag-b">❌ 비권장</span>';
 
-  const brandRows=BRANDS.map(b=>{
+  const top15Rows=CHICKEN_TOP15.map(b=>{
     const cnt=(analysisData[b.id]||[]).length;
-    const thr=cnt===0?'<span class="tag-g">없음</span>':cnt<=1?'<span class="tag-w">보통</span>':'<span class="tag-b">높음</span>';
-    const places=(analysisData[b.id]||[]).map(p=>`${p.name}(${p.distance}m)`).join(', ')||'—';
-    return `<tr>
-      <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${b.color};margin-right:4px;vertical-align:middle;"></span>${b.name}</td>
-      <td style="text-align:center;font-weight:800;">${cnt}</td>
-      <td>${thr}</td>
-      <td style="color:#999;font-size:10px;">${places}</td>
-    </tr>`;
+    const thr=cnt===0?'<span class="tag-g">없음</span>':cnt<=2?'<span class="tag-w">보통</span>':'<span class="tag-b">높음</span>';
+    const places=(analysisData[b.id]||[]).slice(0,5).map(p=>`${p.name}(${p.distance}m)`).join(', ')||'—';
+    return `<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${b.color};margin-right:4px;vertical-align:middle;"></span>${b.name}</td><td style="text-align:center;font-weight:800;">${cnt}</td><td>${thr}</td><td style="color:#999;font-size:10px;">${places}</td></tr>`;
   }).join('');
+
+  const ffRows=(analysisData['fastfood']||[]).slice(0,10).map(p=>`<tr><td>${p.ffBrand||'—'}</td><td>${p.name}</td><td style="color:#999;">${p.distance}m</td></tr>`).join('')||'<tr><td colspan="3" style="color:#bbb;text-align:center;">없음</td></tr>';
 
   document.getElementById('modalBody').innerHTML=`
     <div class="mscore">
@@ -796,15 +975,27 @@ function showModal(){
     </div>
     <div class="modr"><span class="mk2">분석 지역</span><span class="mv">${q}</span></div>
     <div class="modr"><span class="mk2">검색 반경</span><span class="mv">${radius}m</span></div>
-    <div class="modr"><span class="mk2">프랜차이즈 치킨</span><span class="mv">${franCnt}개소</span></div>
-    <div class="modr"><span class="mk2">동네치킨</span><span class="mv">${localCnt}개소</span></div>
-    <div class="modr"><span class="mk2">교촌 기존점(반경)</span><span class="mv">${kyoCnt}개소</span></div>
+    <div class="modr"><span class="mk2">치킨 프랜차이즈 (TOP15+기타)</span><span class="mv">${franCnt}개소</span></div>
+    <div class="modr"><span class="mk2">동네치킨 (독립점)</span><span class="mv">${localCnt}개소</span></div>
+    <div class="modr"><span class="mk2">교촌 기존점(반경내)</span><span class="mv">${kyoCnt}개소</span></div>
+    <div class="modr"><span class="mk2">기타 프랜차이즈(버거/피자)</span><span class="mv">${ffCnt}개소</span></div>
     <div class="modr"><span class="mk2">분석 일시</span><span class="mv">${new Date().toLocaleString('ko-KR')}</span></div>
-    <div style="margin-top:12px;font-size:11px;font-weight:800;color:#999;margin-bottom:4px;">브랜드별 상세</div>
+
+    <div class="mod-section-title">▶ 치킨 TOP15 브랜드별 상세</div>
     <table class="mod-btable">
-      <thead><tr><th>브랜드</th><th>수</th><th>위협도</th><th>장소 목록</th></tr></thead>
-      <tbody>${brandRows}</tbody>
+      <thead><tr><th>브랜드</th><th>수</th><th>위협도</th><th>주요 장소</th></tr></thead>
+      <tbody>${top15Rows}</tbody>
     </table>
+
+    <div class="mod-section-title">▶ 기타 치킨 프랜차이즈</div>
+    <div style="font-size:11px;color:#444;padding:4px 0;">${otherCkCnt}개소 발견 (${(analysisData['otherChicken']||[]).slice(0,8).map(p=>p.name+'('+p.distance+'m)').join(', ')||'없음'})</div>
+
+    <div class="mod-section-title">▶ 기타 프랜차이즈 (버거/피자) 목록 (최대 10개)</div>
+    <table class="mod-btable">
+      <thead><tr><th>브랜드</th><th>장소명</th><th>거리</th></tr></thead>
+      <tbody>${ffRows}</tbody>
+    </table>
+
     <div style="margin-top:14px;display:flex;gap:7px;">
       <button class="ab p" style="flex:1;padding:9px;" onclick="exportCSV();closeModal();">CSV 다운로드</button>
       <button class="ab s" style="flex:1;padding:9px;" onclick="closeModal()">닫기</button>
@@ -816,13 +1007,11 @@ function closeModal(e){
     document.getElementById('modalOverlay').classList.remove('show');
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  CHART (Sample)
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 const popData=[10,14,18,28,38,50,62,70,62,78,92,100,88,72,58,48,68,88,100,94,78,58,38,20];
-const colData=['#c8e0ff','#c8e0ff','#c8e0ff','#c8e0ff','#a0c4f4','#a0c4f4','#6aaaf0','#4090e8',
-               '#4090e8','#c8151b','#c8151b','#c8151b','#c8151b','#c8151b','#c8151b','#c8151b',
-               '#c8151b','#c8151b','#8b0000','#8b0000','#c8151b','#c8151b','#a0c4f4','#c8e0ff'];
+const colData=['#c8e0ff','#c8e0ff','#c8e0ff','#c8e0ff','#a0c4f4','#a0c4f4','#6aaaf0','#4090e8',               '#4090e8','#c8151b','#c8151b','#c8151b','#c8151b','#c8151b','#c8151b','#c8151b',               '#c8151b','#c8151b','#8b0000','#8b0000','#c8151b','#c8151b','#a0c4f4','#c8e0ff'];
 const chartEl=document.getElementById('chartBars');
 popData.forEach((v,i)=>{
   const col=document.createElement('div');
