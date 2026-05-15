@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교촌에프앤비 상권분석 툴 v2.2</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #111; color: #eee; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
+
+#header {
+  background: linear-gradient(90deg, #1a0000 0%, #2a0505 50%, #1a0000 100%);
+  border-bottom: 2px solid #c8202a;
+  padding: 0 16px;
+  height: 46px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(200,32,42,0.5);
+  z-index: 100;
+}
+.logo-text { font-size: 18px; font-weight: 900; color: #c8202a; letter-spacing: -0.5px; white-space: nowrap; }
+.logo-text span { color: #d4a017; }
+.version-badge { background: #c8202a; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; }
+.api-badge { background: #1a3a1a; border: 1px solid #2d7a2d; color: #5fca5f; font-size: 10px; padding: 2px 8px; border-radius: 10px; display: flex; align-items: center; gap: 4px; }
+.api-dot { width: 6px; height: 6px; border-radius: 50%; background: #5fca5f; animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.header-spacer { flex: 1; }
+.hdr-btn { background: transparent; border: 1px solid #333; color: #aaa; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.2s; white-space: nowrap; }
+.hdr-btn:hover { border-color: #d4a017; color: #d4a017; }
+
+#body { display: flex; flex: 1; overflow: hidden; }
+
+#sidebar {
+  width: 220px; min-width: 220px;
+  background: #161616;
+  border-right: 1px solid #2a2a2a;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sb-section { padding: 10px 12px; border-bottom: 1px solid #222; }
+.sb-label { font-size: 10px; color: #666; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+.search-input {
+  width: 100%; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 7px;
+  color: #eee; padding: 7px 10px; font-size: 12px; outline: none;
+  transition: border-color 0.2s; font-family: inherit;
+}
+.search-input:focus { border-color: #c8202a; }
+.btn-analyze {
+  width: 100%; margin-top: 7px;
+  background: linear-gradient(135deg, #c8202a, #a01a22);
+  color: #fff; border: none; border-radius: 7px;
+  padding: 9px; font-size: 13px; font-weight: 800; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn-analyze:hover { background: linear-gradient(135deg, #e02530, #c8202a); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,32,42,0.4); }
+.btn-analyze:active { transform: translateY(0); }
+
+.brand-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid transparent; transition: all 0.2s;
+  user-select: none; white-space: nowrap;
+}
+.chip.active { opacity: 1; }
+.chip:not(.active) { opacity: 0.25; filter: grayscale(0.8); }
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.radius-row { display: flex; align-items: center; gap: 8px; }
+.radius-row input[type=range] { flex: 1; accent-color: #c8202a; }
+.radius-val { font-size: 12px; color: #d4a017; font-weight: 700; width: 40px; text-align: right; }
+
+.score-big-wrap { text-align: center; padding: 6px 0; }
+.score-big-num { font-size: 52px; font-weight: 900; line-height: 1; }
+.score-big-label { font-size: 11px; color: #777; margin-top: 3px; }
+.rec-tag { display: inline-block; margin-top: 7px; padding: 4px 14px; border-radius: 12px; font-size: 12px; font-weight: 800; }
+
+.mini-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mini-stat { background: #1a1a1a; border-radius: 7px; padding: 8px; text-align: center; border: 1px solid #222; }
+.mini-stat .val { font-size: 20px; font-weight: 900; color: #c8202a; }
+.mini-stat .lbl { font-size: 9px; color: #666; margin-top: 2px; }
+
+.bar-rows { display: flex; flex-direction: column; gap: 5px; }
+.bar-row { display: flex; align-items: center; gap: 6px; }
+.bar-name { font-size: 10px; color: #777; width: 52px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 5px; background: #1e1e1e; border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.bar-num { font-size: 10px; color: #aaa; width: 22px; text-align: right; }
+
+.rec-type-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; padding: 3px 0; }
+.rec-icon { font-size: 14px; }
+
+.sb-footer { margin-top: auto; padding: 10px 12px; border-top: 1px solid #222; display: flex; flex-direction: column; gap: 5px; }
+.btn-sm { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; color: #aaa; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.2s; font-family: inherit; }
+.btn-sm:hover { border-color: #c8202a; color: #c8202a; }
+.btn-sm.gold:hover { border-color: #d4a017; color: #d4a017; }
+
+#mapWrap { flex: 1; position: relative; overflow: hidden; }
+#map { width: 100%; height: 100%; background: #1a1a2a; }
+
+#mapTypeBar {
+  position: absolute; top: 10px; right: 10px; z-index: 50;
+  display: flex; gap: 4px;
+}
+.map-type-btn { background: rgba(20,20,30,0.9); border: 1px solid #333; color: #aaa; padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: all 0.2s; backdrop-filter: blur(4px); }
+.map-type-btn.active { background: #c8202a; border-color: #c8202a; color: #fff; }
+
+#loadingOverlay {
+  position: absolute; inset: 0;
+  background: rgba(10,10,10,0.8); display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 14px; z-index: 200;
+  backdrop-filter: blur(4px);
+}
+#loadingOverlay.show { display: flex; }
+.spinner { width: 40px; height: 40px; border: 3px solid #2a2a2a; border-top-color: #c8202a; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ld-text { font-size: 14px; color: #ddd; font-weight: 700; }
+.ld-sub { font-size: 11px; color: #666; }
+.ld-bar-wrap { width: 200px; height: 3px; background: #222; border-radius: 2px; overflow: hidden; }
+.ld-bar { height: 100%; background: linear-gradient(90deg, #c8202a, #d4a017); border-radius: 2px; transition: width 0.4s ease; }
+
+/* API 키 오류 배너 */
+#apiErrBanner {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  background: #2a0a0a; border: 1px solid #c8202a; border-radius: 10px;
+  padding: 12px 20px; text-align: center; z-index: 300; display: none; min-width: 320px;
+  box-shadow: 0 4px 20px rgba(200,32,42,0.4);
+}
+#apiErrBanner h3 { color: #c8202a; font-size: 14px; margin-bottom: 5px; }
+#apiErrBanner p { font-size: 11px; color: #888; line-height: 1.7; }
+
+#statusBar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(10,10,10,0.88); border-top: 1px solid #222;
+  padding: 5px 12px; display: flex; align-items: center; gap: 10px;
+  font-size: 10px; flex-wrap: wrap; backdrop-filter: blur(4px);
+  z-index: 50;
+}
+.leg-item { display: flex; align-items: center; gap: 4px; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+.leg-name { color: #aaa; }
+.leg-cnt { color: #555; }
+#statusMsg { margin-left: auto; color: #d4a017; font-size: 10px; }
+
+#rightPanel {
+  width: 280px; min-width: 280px;
+  background: #161616; border-left: 1px solid #2a2a2a;
+  display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+}
+.rp-tabs { display: flex; border-bottom: 1px solid #222; flex-shrink: 0; }
+.rp-tab { flex: 1; background: transparent; border: none; color: #666; font-size: 10px; padding: 9px 2px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: inherit; }
+.rp-tab.active { color: #c8202a; border-bottom-color: #c8202a; }
+.rp-body { flex: 1; overflow-y: auto; padding: 10px; }
+.rp-body::-webkit-scrollbar { width: 3px; }
+.rp-body::-webkit-scrollbar-thumb { background: #2a2a2a; }
+
+.comp-row { display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; border-radius: 7px; padding: 7px 9px; margin-bottom: 5px; border: 1px solid transparent; transition: border-color 0.2s; }
+.comp-row:hover { border-color: #2a2a2a; }
+.comp-left { display: flex; align-items: center; gap: 7px; }
+.comp-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.comp-name { font-size: 11px; font-weight: 700; }
+.comp-addr { font-size: 9px; color: #555; margin-top: 1px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comp-dist { font-size: 10px; color: #d4a017; font-weight: 700; }
+
+.chart-card { background: #1a1a1a; border-radius: 9px; padding: 11px; margin-bottom: 10px; }
+.chart-card-title { font-size: 10px; color: #666; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.chart-warn { font-size: 9px; color: #6a5a20; margin-top: 5px; }
+
+.log-line { font-size: 10px; padding: 3px 0; border-bottom: 1px solid #1a1a1a; line-height: 1.5; }
+.log-ts { color: #333; margin-right: 5px; }
+.log-ok { color: #4caf50; }
+.log-warn { color: #ff9800; }
+.log-err { color: #f44336; }
+.log-info { color: #64b5f6; }
+
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px);
+  background: #222; border: 1px solid #333; color: #eee; padding: 9px 20px;
+  border-radius: 20px; font-size: 12px; opacity: 0; transition: all 0.3s;
+  z-index: 9999; pointer-events: none; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#placeDetail {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
+  padding: 12px 16px; font-size: 12px; z-index: 80; display: none; min-width: 220px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+#placeDetail .pd-name { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+#placeDetail .pd-info { color: #888; font-size: 11px; line-height: 1.7; }
+#placeDetail .pd-close { position: absolute; top: 8px; right: 10px; background: none; border: none; color: #555; cursor: pointer; font-size: 14px; }
+
+.empty-msg { text-align: center; color: #444; font-size: 12px; padding: 40px 0; line-height: 2.2; }
+.section-hdr { font-size: 10px; color: #555; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 7px; margin-top: 3px; }
+
+.summary-card { background: #1a1a1a; border-radius: 9px; padding: 11px; margin-bottom: 9px; border: 1px solid #222; }
+.summary-card h4 { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-bottom: 1px solid #1e1e1e; }
+.summary-row:last-child { border-bottom: none; }
+.summary-key { font-size: 11px; color: #777; }
+.summary-val { font-size: 11px; font-weight: 700; color: #ddd; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo-text">교촌<span>에프앤비</span></div>
+  <div class="version-badge">v2.2</div>
+  <div class="api-badge"><div class="api-dot"></div>카카오맵 실시간 연동</div>
+  <div class="header-spacer"></div>
+  <button class="hdr-btn" onclick="exportCSV()">📊 CSV 내보내기</button>
+  <button class="hdr-btn" onclick="generateReport()">📋 분석 리포트</button>
+  <button class="hdr-btn" onclick="clearAll(true)">🗑 초기화</button>
+</div>
+
+<div id="body">
+
+  <div id="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">지역 검색</div>
+      <input class="search-input" id="searchInput" type="text" placeholder="서울시 마포구 망원동" />
+      <button class="btn-analyze" onclick="doSearch()">🔍 상권 분석 시작</button>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">브랜드 필터 — 지역 프랜차이즈 TOP 15</div>
+      <div id="chipWrap" class="brand-chips"></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">검색 반경</div>
+      <div class="radius-row">
+        <input type="range" id="radiusSlider" min="300" max="2000" step="100" value="1000" oninput="onRadiusChange(this.value)" />
+        <span class="radius-val" id="radiusVal">1.0km</span>
+      </div>
+    </div>
+
+    <div class="sb-section" id="scoreSection">
+      <div class="sb-label">입지 종합 스코어</div>
+      <div class="score-big-wrap">
+        <div class="score-big-num" id="scoreBig" style="color:#555">—</div>
+        <div class="score-big-label">/100점</div>
+        <div id="recTagWrap"></div>
+      </div>
+    </div>
+
+    <div class="sb-section" id="kpiSection">
+      <div class="sb-label">주요 지표</div>
+      <div class="mini-stat-grid">
+        <div class="mini-stat"><div class="val" id="kpiTotal">—</div><div class="lbl">전체 검색 장소</div></div>
+        <div class="mini-stat"><div class="val" id="kpiChicken" style="color:#d4a017">—</div><div class="lbl">치킨 프랜차이즈</div></div>
+        <div class="mini-stat"><div class="val" id="kpiKyochon" style="color:#c8202a">—</div><div class="lbl">교촌 기준점</div></div>
+        <div class="mini-stat"><div class="val" id="kpiOther">—</div><div class="lbl">동네치킨</div></div>
+      </div>
+    </div>
+
+    <div class="sb-section" id="scoreBarSection">
+      <div class="sb-label">세부 점수</div>
+      <div class="bar-rows" id="scoreBarRows"></div>
+    </div>
+
+    <div class="sb-section" id="recSection" style="display:none">
+      <div class="sb-label">입점 추천 유형</div>
+      <div id="recTypeRows"></div>
+    </div>
+
+    <div class="sb-footer">
+      <button class="btn-sm gold" onclick="exportCSV()">📊 CSV 내보내기</button>
+      <button class="btn-sm" onclick="clearAll(true)">🔄 초기화</button>
+    </div>
+  </div>
+
+  <div id="mapWrap">
+    <div id="map"></div>
+
+    <div id="mapTypeBar">
+      <button class="map-type-btn active" id="btnNormal" onclick="setMapType('normal')">일반지도</button>
+      <button class="map-type-btn" id="btnSky" onclick="setMapType('sky')">스카이뷰</button>
+      <button class="map-type-btn" id="btnHybrid" onclick="setMapType('hybrid')">하이브리드</button>
+    </div>
+
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="ld-text" id="ldText">상권 분석 중...</div>
+      <div class="ld-bar-wrap"><div class="ld-bar" id="ldBar" style="width:0%"></div></div>
+      <div class="ld-sub" id="ldSub">잠시만 기다려주세요</div>
+    </div>
+
+    <!-- API 키 오류 배너 (팝업 입력창 대신) -->
+    <div id="apiErrBanner">
+      <h3>🔑 카카오 API 키 오류</h3>
+      <p>코드 상단 <code style="color:#d4a017">KAKAO_API_KEY</code> 상수를<br>유효한 JavaScript 앱 키로 교체해주세요.</p>
+    </div>
+
+    <div id="placeDetail">
+      <button class="pd-close" onclick="closePD()">✕</button>
+      <div class="pd-name" id="pdName"></div>
+      <div class="pd-info" id="pdInfo"></div>
+    </div>
+
+    <div id="statusBar">
+      <div id="legendWrap" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+      <span id="statusMsg">지도를 불러오는 중...</span>
+    </div>
+  </div>
+
+  <div id="rightPanel">
+    <div class="rp-tabs">
+      <button class="rp-tab active" onclick="rpTab('analysis',this)">📈 분석패널</button>
+      <button class="rp-tab" onclick="rpTab('competitors',this)">🏪 경쟁현황</button>
+      <button class="rp-tab" onclick="rpTab('chart',this)">📊 차트</button>
+      <button class="rp-tab" onclick="rpTab('log',this)">📋 로그</button>
+    </div>
+
+    <div id="rp-analysis" class="rp-body">
+      <div class="empty-msg" id="analysisEmpty">🔍 분석을 시작하면<br>실시간 결과가 표시됩니다</div>
+      <div id="analysisContent" style="display:none"></div>
+    </div>
+
+    <div id="rp-competitors" class="rp-body" style="display:none">
+      <div class="empty-msg" id="compEmpty">🔍 분석 후 경쟁사<br>현황이 표시됩니다</div>
+      <div id="compContent" style="display:none"></div>
+    </div>
+
+    <div id="rp-chart" class="rp-body" style="display:none">
+      <div class="chart-card">
+        <div class="chart-card-title">시간대별 유동인구 (추정)</div>
+        <canvas id="popChart" height="120"></canvas>
+        <div class="chart-warn">⚠ 샘플 데이터 — 실제와 다를 수 있음</div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title" id="brandChartTitle">브랜드별 분포</div>
+        <canvas id="brandChart" height="160"></canvas>
+      </div>
+    </div>
+
+    <div id="rp-log" class="rp-body" style="display:none">
+      <div class="section-hdr">분석 로그</div>
+      <div id="logWrap"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   교촌에프앤비 상권분석 툴 v2.2 — API키 하드코딩 버전
+   ▶ 아래 KAKAO_API_KEY 값만 실제 JavaScript 앱 키로 교체하세요.
+   ▶ localStorage, 팝업 입력창, applyApiKey() 완전 제거.
+============================================================ */
+
+// ══════════════════════════════════════════════════════════════
+//  ★ 여기만 수정하세요 ★
+const KAKAO_API_KEY = '3ff2c2207296c1586aa791baeb974af6';
+// ══════════════════════════════════════════════════════════════
+
+const BRANDS = [
+  { id:'kyochon',   name:'교촌',      kw:'교촌치킨',          color:'#c8202a', isTarget:true  },
+  { id:'bhc',       name:'bhc',       kw:'bhc치킨',           color:'#e8b800', isTarget:false },
+  { id:'bbq',       name:'BBQ',       kw:'BBQ치킨',           color:'#ff6b00', isTarget:false },
+  { id:'golden',    name:'굽네',      kw:'굽네치킨',          color:'#1a7a1a', isTarget:false },
+  { id:'puradak',   name:'푸라닭',    kw:'푸라닭치킨',        color:'#0044cc', isTarget:false },
+  { id:'nene',      name:'네네',      kw:'네네치킨',          color:'#4caf50', isTarget:false },
+  { id:'60jae',     name:'60계',      kw:'60계치킨',          color:'#8b4513', isTarget:false },
+  { id:'noryang',   name:'노랑통닭',  kw:'노랑통닭',          color:'#ffb300', isTarget:false },
+  { id:'mexicana',  name:'멕시카나',  kw:'멕시카나치킨',      color:'#9c27b0', isTarget:false },
+  { id:'chugajip',  name:'처갓집',    kw:'처갓집양념치킨',    color:'#ff5722', isTarget:false },
+  { id:'hosigi',    name:'호식이',    kw:'호식이두마리치킨',  color:'#607d8b', isTarget:false },
+  { id:'pelicana',  name:'페리카나',  kw:'페리카나치킨',      color:'#2196f3', isTarget:false },
+  { id:'jakoba',    name:'자코바',    kw:'자코바치킨',        color:'#795548', isTarget:false },
+  { id:'jaddam',    name:'자담',      kw:'자담치킨',          color:'#e91e63', isTarget:false },
+  { id:'other',     name:'기타치킨',  kw:null,               color:'#555',    isTarget:false },
+];
+
+const OTHER_KWS = [
+  '땅땅치킨','또봐치킨','또봉이통닭','달콤치킨','통큰치킨','참치킨',
+  '치킨플러스','치킨매니아','훌랄라','두마리치킨','원할머니','치킨왕',
+  '맘스터치','고도리치킨','스모프치킨','치킨박사','치킨나라'
+];
+
+const ALL_FRANCHISE_KW_LOW = BRANDS
+  .filter(b => b.id !== 'other' && b.kw)
+  .map(b => b.kw.toLowerCase());
+
+let map, ps, geocoder, circle;
+let currentCenter = null;
+let radius = 1000;
+let activeFilters = new Set(BRANDS.map(b => b.id));
+let allPlaces = [];
+let seenPlaces = new Set();
+let analysisResult = null;
+let radiusTimer = null;
+let popChartInst = null;
+let brandChartInst = null;
+
+// ── 초기화 ──────────────────────────────────────────────────
+window.onload = function () {
+  buildChips();
+  initPopChart();
+  loadKakaoScript(KAKAO_API_KEY);
+};
+
+function loadKakaoScript(key) {
+  const s = document.createElement('script');
+  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&libraries=services&autoload=false`;
+  s.onload = () => kakao.maps.load(initMap);
+  s.onerror = () => {
+    document.getElementById('apiErrBanner').style.display = 'block';
+    setStatus('API 키 오류 — 코드 상단 KAKAO_API_KEY를 확인해주세요');
+    addLog('카카오 SDK 로드 실패: API 키를 확인하세요', 'err');
+  };
+  document.head.appendChild(s);
+}
+
+function initMap() {
+  const container = document.getElementById('map');
+  map = new kakao.maps.Map(container, {
+    center: new kakao.maps.LatLng(37.5665, 126.9780),
+    level: 5
+  });
+  ps = new kakao.maps.services.Places();
+  geocoder = new kakao.maps.services.Geocoder();
+  setStatus('지도 준비 완료 — 주소를 입력하고 분석을 시작하세요');
+  addLog('카카오맵 API 초기화 완료', 'ok');
+}
+
+// ── 브랜드 칩 ───────────────────────────────────────────────
+function buildChips() {
+  const wrap = document.getElementById('chipWrap');
+  wrap.innerHTML = '';
+  BRANDS.forEach(b => {
+    const c = document.createElement('span');
+    c.className = 'chip active';
+    c.dataset.id = b.id;
+    c.style.background = b.color + '22';
+    c.style.borderColor = b.color;
+    c.style.color = b.color;
+    c.innerHTML = `<span class="chip-dot" style="background:${b.color}"></span>${b.name}`;
+    c.addEventListener('click', () => toggleChip(b.id, c));
+    wrap.appendChild(c);
+  });
+}
+
+function toggleChip(id, el) {
+  if (activeFilters.has(id)) { activeFilters.delete(id); el.classList.remove('active'); }
+  else { activeFilters.add(id); el.classList.add('active'); }
+  refreshMarkers();
+}
+
+// ── 검색 ────────────────────────────────────────────────────
+function doSearch() {
+  const q = (document.getElementById('searchInput').value || '').trim();
+  if (!q) { showToast('분석할 주소나 지역명을 입력해주세요'); return; }
+  if (!map) { showToast('지도를 불러오는 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+  clearAll(false);
+  showLoading('주소 검색 중...', q, 0);
+  addLog(`검색 시작: "${q}"`, 'info');
+
+  geocoder.addressSearch(q, (res, st) => {
+    if (st === kakao.maps.services.Status.OK) {
+      startAnalysis(new kakao.maps.LatLng(res[0].y, res[0].x));
+    } else {
+      ps.keywordSearch(q, (res2, st2) => {
+        if (st2 === kakao.maps.services.Status.OK) {
+          startAnalysis(new kakao.maps.LatLng(res2[0].y, res2[0].x));
+        } else {
+          hideLoading();
+          showToast('주소를 찾을 수 없습니다');
+          addLog(`주소 검색 실패: "${q}"`, 'err');
+          setStatus('주소 검색 실패');
+        }
+      });
+    }
+  });
+}
+
+function startAnalysis(coord) {
+  currentCenter = coord;
+  map.setCenter(coord);
+  map.setLevel(4);
+  drawCircle(coord);
+  placeCenterMarker(coord);
+  setStatus('상권 분석 중...');
+  addLog(`좌표: ${coord.getLat().toFixed(5)}, ${coord.getLng().toFixed(5)}`, 'info');
+  buildQueue(coord);
+}
+
+// ── 원 & 중심 마커 ──────────────────────────────────────────
+function drawCircle(coord) {
+  if (circle) circle.setMap(null);
+  circle = new kakao.maps.Circle({
+    center: coord, radius,
+    strokeWeight: 2, strokeColor: '#c8202a', strokeOpacity: 0.8, strokeStyle: 'solid',
+    fillColor: '#c8202a', fillOpacity: 0.05
+  });
+  circle.setMap(map);
+}
+
+function placeCenterMarker(coord) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="40" viewBox="0 0 34 40">
+    <path d="M17 0C7.6 0 0 7.6 0 17c0 11.9 17 23 17 23S34 28.9 34 17C34 7.6 26.4 0 17 0z" fill="#c8202a"/>
+    <circle cx="17" cy="17" r="8" fill="white"/><circle cx="17" cy="17" r="4.5" fill="#c8202a"/>
+  </svg>`;
+  const img = new kakao.maps.MarkerImage(
+    'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
+    new kakao.maps.Size(34, 40), { offset: new kakao.maps.Point(17, 40) }
+  );
+  new kakao.maps.Marker({ position: coord, map, image: img, zIndex: 15 });
+}
+
+// ── 검색 큐 ─────────────────────────────────────────────────
+let queue = [];
+
+function buildQueue(coord) {
+  queue = [];
+  BRANDS.filter(b => b.id !== 'other' && b.kw).forEach(b => queue.push({ type:'brand', brand:b, coord }));
+  OTHER_KWS.forEach(kw => queue.push({ type:'other', kw, coord }));
+  addLog(`검색 큐 생성: ${queue.length}개 항목`, 'info');
+  processQueue(0);
+}
+
+function processQueue(idx) {
+  if (idx >= queue.length) { finishAnalysis(); return; }
+  const pct = Math.round((idx / queue.length) * 100);
+  updateLoading('상권 분석 중...', `${idx} / ${queue.length} 검색 완료`, pct);
+  const item = queue[idx];
+  const next = () => setTimeout(() => processQueue(idx + 1), 280);
+  if (item.type === 'brand') searchBrand(item.brand, item.coord, next);
+  else searchOtherKw(item.kw, item.coord, next);
+}
+
+// ── 브랜드 검색 ─────────────────────────────────────────────
+function searchBrand(brand, coord, cb) {
+  ps.keywordSearch(brand.kw, (res, st) => {
+    if (st === kakao.maps.services.Status.OK) {
+      let cnt = 0;
+      res.forEach(p => {
+        const uid = p.id || (p.place_name + p.x + p.y);
+        if (seenPlaces.has(uid)) return;
+        const d = calcDist(coord, p);
+        if (d > radius) return;
+        seenPlaces.add(uid);
+        addMarker(brand, p, d);
+        cnt++;
+      });
+      if (cnt > 0) addLog(`${brand.name}: ${cnt}개 발견`, 'ok');
+      else addLog(`${brand.name}: 결과 없음`, 'warn');
+    } else {
+      addLog(`${brand.name}: 검색 오류`, 'warn');
+    }
+    cb();
+  }, { location: coord, radius, size: 15 });
+}
+
+function searchOtherKw(kw, coord, cb) {
+  ps.keywordSearch(kw, (res, st) => {
+    if (st === kakao.maps.services.Status.OK) {
+      const otherBrand = BRANDS.find(b => b.id === 'other');
+      res.forEach(p => {
+        const uid = p.id || (p.place_name + p.x + p.y);
+        if (seenPlaces.has(uid)) return;
+        const d = calcDist(coord, p);
+        if (d > radius) return;
+        const low = p.place_name.toLowerCase();
+        if (ALL_FRANCHISE_KW_LOW.some(fk => low.includes(fk))) return;
+        seenPlaces.add(uid);
+        addMarker(otherBrand, p, d);
+      });
+    }
+    cb();
+  }, { location: coord, radius, size: 15 });
+}
+
+// ── 마커 추가 ────────────────────────────────────────────────
+function addMarker(brand, place, dist) {
+  const pos = new kakao.maps.LatLng(place.y, place.x);
+  const s = brand.isTarget ? 30 : 24;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s+6}" viewBox="0 0 30 36">
+    <path d="M15 0C6.7 0 0 6.7 0 15c0 10.4 15 21 15 21S30 25.4 30 15C30 6.7 23.3 0 15 0z" fill="${brand.color}"/>
+    <circle cx="15" cy="15" r="8" fill="white" opacity="0.9"/>
+    <text x="15" y="19" text-anchor="middle" font-size="8" font-weight="900" fill="${brand.color}" font-family="sans-serif">${brand.name.charAt(0)}</text>
+  </svg>`;
+  const img = new kakao.maps.MarkerImage(
+    'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))),
+    new kakao.maps.Size(s, s + 6), { offset: new kakao.maps.Point(s / 2, s + 6) }
+  );
+  const marker = new kakao.maps.Marker({ position: pos, map, image: img, zIndex: brand.isTarget ? 8 : 4 });
+
+  const oc = document.createElement('div');
+  oc.style.cssText = `background:${brand.color};color:#fff;padding:4px 9px;border-radius:7px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;`;
+  oc.innerHTML = `${brand.name}<br><span style="font-weight:400;font-size:9px">${place.place_name} · ${Math.round(dist)}m</span>`;
+  const overlay = new kakao.maps.CustomOverlay({ content: oc, position: pos, yAnchor: 2.2, zIndex: 20 });
+
+  const item = { brand, place, dist, marker, overlay, visible: true };
+  allPlaces.push(item);
+
+  kakao.maps.event.addListener(marker, 'click',     (function(it) { return function() { showPlaceDetail(it); }; })(item));
+  kakao.maps.event.addListener(marker, 'mouseover', (function(ov) { return function() { ov.setMap(map); }; })(overlay));
+  kakao.maps.event.addListener(marker, 'mouseout',  (function(ov) { return function() { ov.setMap(null); }; })(overlay));
+}
+
+function showPlaceDetail(item) {
+  const { brand, place, dist } = item;
+  document.getElementById('pdName').textContent = place.place_name;
+  document.getElementById('pdName').style.color = brand.color;
+  document.getElementById('pdInfo').innerHTML =
+    `브랜드: <b style="color:${brand.color}">${brand.name}</b><br>` +
+    `주소: ${place.road_address_name || place.address_name || '—'}<br>` +
+    `전화: ${place.phone || '—'}<br>` +
+    `중심까지: <b style="color:#d4a017">${Math.round(dist)}m</b>`;
+  document.getElementById('placeDetail').style.display = 'block';
+  addLog(`선택: ${place.place_name} [${brand.name}] ${Math.round(dist)}m`, 'info');
+}
+
+function closePD() { document.getElementById('placeDetail').style.display = 'none'; }
+
+// ── 거리 계산 ────────────────────────────────────────────────
+function calcDist(center, place) {
+  const R = 6371000;
+  const lat1 = center.getLat() * Math.PI / 180;
+  const lat2 = +place.y * Math.PI / 180;
+  const dLat = (+place.y - center.getLat()) * Math.PI / 180;
+  const dLng = (+place.x - center.getLng()) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── 분석 완료 ────────────────────────────────────────────────
+function finishAnalysis() {
+  hideLoading();
+  updateLegend();
+  analysisResult = computeScore();
+  renderSidebarScore(analysisResult);
+  renderRightAnalysis(analysisResult);
+  renderCompPanel();
+  updateBrandChart();
+  addLog(`분석 완료: ${allPlaces.length}개 매장`, 'ok');
+  setStatus(`분석 완료 — 총 ${allPlaces.length}개 매장 | 반경 ${radius}m`);
+  showToast(`✅ 분석 완료! 총 ${allPlaces.length}개 치킨 매장 발견`);
+}
+
+// ── 점수 계산 ────────────────────────────────────────────────
+function computeScore() {
+  const total   = allPlaces.length;
+  const kyochon = allPlaces.filter(p => p.brand.id === 'kyochon').length;
+  const comp    = total - kyochon;
+  const compDensity = Math.max(0, Math.round(100 - comp * 7));
+  const selfScore   = kyochon === 0 ? 100 : Math.max(15, 100 - kyochon * 28);
+  const popScore    = Math.min(100, Math.round(40 + radius / 28));
+  const rentScore   = Math.max(25, Math.round(88 - radius / 38));
+  const total_score = Math.round(compDensity * 0.35 + selfScore * 0.30 + popScore * 0.20 + rentScore * 0.15);
+
+  let rec, recColor, recBg;
+  if (total_score >= 80)      { rec = '강력 추천 ✅'; recColor = '#4caf50'; recBg = 'rgba(76,175,80,0.15)'; }
+  else if (total_score >= 60) { rec = '검토 가능 ⚠️'; recColor = '#ff9800'; recBg = 'rgba(255,152,0,0.15)'; }
+  else                        { rec = '진입 주의 ❌'; recColor = '#f44336'; recBg = 'rgba(244,67,54,0.15)'; }
+
+  return { total_score, compDensity, selfScore, popScore, rentScore, rec, recColor, recBg, kyochon, comp, total };
+}
+
+// ── 사이드바 점수 렌더링 ─────────────────────────────────────
+function renderSidebarScore(r) {
+  const col = r.total_score >= 80 ? '#4caf50' : r.total_score >= 60 ? '#ff9800' : '#f44336';
+  document.getElementById('scoreBig').textContent = r.total_score;
+  document.getElementById('scoreBig').style.color = col;
+  document.getElementById('recTagWrap').innerHTML =
+    `<span class="rec-tag" style="background:${r.recBg};color:${r.recColor};border:1px solid ${r.recColor}33">${r.rec}</span>`;
+
+  document.getElementById('kpiTotal').textContent   = r.total;
+  document.getElementById('kpiChicken').textContent = r.total;
+  document.getElementById('kpiKyochon').textContent = r.kyochon;
+  document.getElementById('kpiOther').textContent   = r.comp;
+
+  const bars = [
+    { name:'경쟁밀도', val: r.compDensity, color:'#4caf50' },
+    { name:'자사포화', val: r.selfScore,   color:'#2196f3' },
+    { name:'유동인구', val: r.popScore,    color:'#ff9800' },
+    { name:'임대료',   val: r.rentScore,   color:'#9c27b0' },
+  ];
+  document.getElementById('scoreBarRows').innerHTML = bars.map(b =>
+    `<div class="bar-row">
+      <div class="bar-name">${b.name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${b.val}%;background:${b.color}"></div></div>
+      <div class="bar-num">${b.val}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('recSection').style.display = 'block';
+  document.getElementById('recTypeRows').innerHTML =
+    `<div class="rec-type-row"><span class="rec-icon">🍗</span><span>치킨 프랜차이즈 <b style="color:#eee">${r.total}개</b></span></div>
+     <div class="rec-type-row"><span class="rec-icon">🎯</span><span>교촌치킨 기준점 <b style="color:#c8202a">${r.kyochon}개</b></span></div>
+     <div class="rec-type-row"><span class="rec-icon">⚔️</span><span>경쟁사 <b style="color:#ff9800">${r.comp}개</b></span></div>`;
+}
+
+// ── 우측 분석탭 렌더링 ───────────────────────────────────────
+function renderRightAnalysis(r) {
+  document.getElementById('analysisEmpty').style.display = 'none';
+  const el = document.getElementById('analysisContent');
+  el.style.display = 'block';
+  const col = r.total_score >= 80 ? '#4caf50' : r.total_score >= 60 ? '#ff9800' : '#f44336';
+
+  const closestList = allPlaces
+    .filter(p => !p.brand.isTarget)
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, 8);
+
+  el.innerHTML = `
+    <div class="summary-card">
+      <h4>종합 점수</h4>
+      <div style="text-align:center;padding:6px 0 10px">
+        <span style="font-size:48px;font-weight:900;color:${col};line-height:1">${r.total_score}</span>
+        <span style="font-size:13px;color:#666">/100</span><br>
+        <span style="background:${r.recBg};color:${r.recColor};border:1px solid ${r.recColor}33;padding:3px 12px;border-radius:10px;font-size:12px;font-weight:800;">${r.rec}</span>
+      </div>
+      <div class="summary-row"><span class="summary-key">분석 반경</span><span class="summary-val">${radius}m</span></div>
+      <div class="summary-row"><span class="summary-key">전체 치킨 매장</span><span class="summary-val">${r.total}개</span></div>
+      <div class="summary-row"><span class="summary-key">교촌치킨</span><span class="summary-val" style="color:#c8202a">${r.kyochon}개</span></div>
+      <div class="summary-row"><span class="summary-key">경쟁 브랜드</span><span class="summary-val" style="color:#ff9800">${r.comp}개</span></div>
+    </div>
+    <div class="section-hdr">근접 경쟁사 TOP 8</div>
+    ${closestList.map(it => `
+      <div class="comp-row">
+        <div class="comp-left">
+          <div class="comp-dot" style="background:${it.brand.color}"></div>
+          <div>
+            <div class="comp-name" style="color:${it.brand.color}">${it.brand.name}</div>
+            <div class="comp-addr">${it.place.place_name}</div>
+          </div>
+        </div>
+        <div class="comp-dist">${Math.round(it.dist)}m</div>
+      </div>`).join('')}
+  `;
+}
+
+// ── 경쟁현황 패널 ────────────────────────────────────────────
+function renderCompPanel() {
+  document.getElementById('compEmpty').style.display = 'none';
+  const el = document.getElementById('compContent');
+  el.style.display = 'block';
+  const counts = {};
+  BRANDS.forEach(b => counts[b.id] = 0);
+  allPlaces.forEach(p => { if (counts[p.brand.id] !== undefined) counts[p.brand.id]++; });
+  const total = allPlaces.length || 1;
+
+  el.innerHTML = `<div class="section-hdr">브랜드별 매장 수 (반경 ${radius}m)</div>` +
+    BRANDS.slice()
+      .sort((a, b) => counts[b.id] - counts[a.id])
+      .filter(b => counts[b.id] > 0)
+      .map(b => `
+        <div class="comp-row">
+          <div class="comp-left">
+            <div class="comp-dot" style="background:${b.color}"></div>
+            <div><div class="comp-name">${b.name}</div><div class="comp-addr">${counts[b.id]}개 매장</div></div>
+          </div>
+          <div class="comp-dist" style="color:#aaa">${((counts[b.id]/total)*100).toFixed(1)}%</div>
+        </div>`).join('');
+}
+
+// ── 범례 ─────────────────────────────────────────────────────
+function updateLegend() {
+  const counts = {};
+  BRANDS.forEach(b => counts[b.id] = 0);
+  allPlaces.forEach(p => { if (counts[p.brand.id] !== undefined) counts[p.brand.id]++; });
+  document.getElementById('legendWrap').innerHTML = BRANDS
+    .filter(b => counts[b.id] > 0)
+    .map(b => `<div class="leg-item"><div class="leg-dot" style="background:${b.color}"></div><span class="leg-name" style="color:${b.color}">${b.name}</span><span class="leg-cnt">${counts[b.id]}</span></div>`)
+    .join('');
+}
+
+// ── 마커 필터 ────────────────────────────────────────────────
+function refreshMarkers() {
+  allPlaces.forEach(item => {
+    const show = activeFilters.has(item.brand.id);
+    item.marker.setMap(show ? map : null);
+    item.visible = show;
+  });
+}
+
+// ── 반경 변경 (debounce 재분석) ─────────────────────────────
+function onRadiusChange(v) {
+  radius = parseInt(v);
+  document.getElementById('radiusVal').textContent =
+    radius >= 1000 ? (radius / 1000).toFixed(1) + 'km' : radius + 'm';
+  if (circle && currentCenter) circle.setRadius(radius);
+  clearTimeout(radiusTimer);
+  radiusTimer = setTimeout(() => {
+    if (currentCenter) {
+      addLog(`반경 변경: ${radius}m → 재분석`, 'info');
+      clearAll(false);
+      startAnalysis(currentCenter);
+    }
+  }, 700);
+}
+
+// ── 초기화 ──────────────────────────────────────────────────
+function clearAll(resetInput = true) {
+  allPlaces.forEach(item => {
+    item.marker.setMap(null);
+    if (item.overlay) item.overlay.setMap(null);
+  });
+  allPlaces = [];
+  seenPlaces = new Set();
+  if (circle) { circle.setMap(null); circle = null; }
+  if (resetInput) { document.getElementById('searchInput').value = ''; currentCenter = null; }
+  document.getElementById('legendWrap').innerHTML = '';
+  document.getElementById('analysisEmpty').style.display = 'block';
+  document.getElementById('analysisContent').style.display = 'none';
+  document.getElementById('compEmpty').style.display = 'block';
+  document.getElementById('compContent').style.display = 'none';
+  document.getElementById('recSection').style.display = 'none';
+  document.getElementById('scoreBig').textContent = '—';
+  document.getElementById('scoreBig').style.color = '#555';
+  document.getElementById('recTagWrap').innerHTML = '';
+  document.getElementById('kpiTotal').textContent = '—';
+  document.getElementById('kpiChicken').textContent = '—';
+  document.getElementById('kpiKyochon').textContent = '—';
+  document.getElementById('kpiOther').textContent = '—';
+  document.getElementById('scoreBarRows').innerHTML = '';
+  document.getElementById('placeDetail').style.display = 'none';
+  analysisResult = null;
+  if (resetInput) setStatus('초기화 완료');
+}
+
+// ── 지도 타입 변경 ───────────────────────────────────────────
+function setMapType(type) {
+  if (!map) return;
+  const types = { normal: kakao.maps.MapTypeId.ROADMAP, sky: kakao.maps.MapTypeId.SKYVIEW, hybrid: kakao.maps.MapTypeId.HYBRID };
+  map.setMapTypeId(types[type]);
+  ['btnNormal','btnSky','btnHybrid'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('btn' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
+}
+
+// ── 차트 ─────────────────────────────────────────────────────
+function initPopChart() {
+  const ctx = document.getElementById('popChart').getContext('2d');
+  popChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['6시','8시','10시','12시','14시','16시','18시','20시','22시','24시'],
+      datasets: [
+        { label:'평일', data:[5,20,12,32,24,28,48,58,34,14], borderColor:'#c8202a', backgroundColor:'rgba(200,32,42,0.1)', fill:true, tension:0.4, pointRadius:3 },
+        { label:'주말', data:[8,14,22,38,42,44,52,62,50,22], borderColor:'#d4a017', backgroundColor:'rgba(212,160,23,0.07)', fill:true, tension:0.4, pointRadius:3 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'#666', font:{size:9}, boxWidth:12 } } },
+      scales:{
+        x:{ ticks:{color:'#555',font:{size:9}}, grid:{color:'rgba(255,255,255,0.03)'} },
+        y:{ ticks:{color:'#555',font:{size:9}}, grid:{color:'rgba(255,255,255,0.03)'} }
+      }
+    }
+  });
+}
+
+function updateBrandChart() {
+  const counts = {};
+  BRANDS.forEach(b => counts[b.id] = 0);
+  allPlaces.forEach(p => { if (counts[p.brand.id] !== undefined) counts[p.brand.id]++; });
+  const active = BRANDS.filter(b => counts[b.id] > 0);
+  if (brandChartInst) brandChartInst.destroy();
+  const ctx = document.getElementById('brandChart').getContext('2d');
+  brandChartInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: active.map(b => b.name),
+      datasets: [{ data: active.map(b => counts[b.id]), backgroundColor: active.map(b => b.color), borderWidth:1, borderColor:'#161616' }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ color:'#888', font:{size:9}, boxWidth:11, padding:7 } } }
+    }
+  });
+  document.getElementById('brandChartTitle').textContent = `브랜드별 분포 (총 ${allPlaces.length}개)`;
+}
+
+// ── CSV 내보내기 ─────────────────────────────────────────────
+function exportCSV() {
+  if (!allPlaces.length) { showToast('분석 데이터가 없습니다'); return; }
+  const BOM = '\uFEFF';
+  const header = '브랜드,매장명,도로명주소,지번주소,전화,거리(m)\n';
+  const rows = allPlaces.map(({ brand, place, dist }) =>
+    [brand.name, place.place_name, place.road_address_name||'', place.address_name||'', place.phone||'', Math.round(dist)]
+      .map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')
+  ).join('\n');
+  const blob = new Blob([BOM + header + rows], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `교촌상권분석_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  addLog('CSV 내보내기 완료', 'ok');
+  showToast('CSV 파일을 저장했습니다');
+}
+
+// ── 리포트 생성 ──────────────────────────────────────────────
+function generateReport() {
+  if (!analysisResult) { showToast('먼저 분석을 실행해주세요'); return; }
+  const r = analysisResult;
+  const counts = {};
+  BRANDS.forEach(b => counts[b.id] = 0);
+  allPlaces.forEach(p => { if (counts[p.brand.id] !== undefined) counts[p.brand.id]++; });
+  const brandLines = BRANDS.filter(b => counts[b.id] > 0).map(b => `  - ${b.name}: ${counts[b.id]}개`).join('\n');
+  const conclusion =
+    r.rec === '강력 추천 ✅'
+      ? '해당 입지는 교촌치킨 신규 출점에 적합합니다.\n경쟁 밀도가 낮고 유동인구가 풍부하여 성공 가능성이 높습니다.'
+      : r.rec === '검토 가능 ⚠️'
+      ? '해당 입지는 추가 검토가 필요합니다.\n경쟁사 분석 및 상권 특성을 면밀히 확인해주세요.'
+      : '해당 입지는 신규 출점 시 주의가 필요합니다.\n경쟁 밀도가 높거나 유동인구가 부족할 수 있습니다.';
+
+  const report = `교촌에프앤비 상권분석 리포트\n===========================\n분석 일시: ${new Date().toLocaleString('ko-KR')}\n분석 주소: ${document.getElementById('searchInput').value || '(설정됨)'}\n분석 반경: ${radius}m\n\n【 입지 종합 점수 】\n총점: ${r.total_score} / 100 (${r.rec})\n  - 경쟁밀도 점수: ${r.compDensity}\n  - 자사 포화도:   ${r.selfScore}\n  - 유동인구 추정: ${r.popScore}\n  - 임대료 추정:   ${r.rentScore}\n\n【 매장 현황 】\n전체 치킨 매장: ${r.total}개\n교촌치킨: ${r.kyochon}개\n경쟁사: ${r.comp}개\n\n【 브랜드별 현황 】\n${brandLines}\n\n【 결론 】\n${conclusion}\n\n* 본 리포트는 카카오맵 데이터 기반으로 생성된 참고 자료입니다.`.trim();
+
+  const blob = new Blob([report], { type:'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `상권분석리포트_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('분석 리포트를 저장했습니다');
+  addLog('리포트 생성 완료', 'ok');
+}
+
+// ── 탭 전환 ─────────────────────────────────────────────────
+function rpTab(id, btn) {
+  ['rp-analysis','rp-competitors','rp-chart','rp-log'].forEach(t => {
+    document.getElementById(t).style.display = 'none';
+  });
+  document.querySelectorAll('.rp-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('rp-' + id).style.display = 'block';
+  btn.classList.add('active');
+}
+
+// ── 로그 ─────────────────────────────────────────────────────
+function addLog(msg, type = 'info') {
+  const wrap = document.getElementById('logWrap');
+  const now = new Date();
+  const ts = [now.getHours(), now.getMinutes(), now.getSeconds()]
+    .map(n => String(n).padStart(2,'0')).join(':');
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = `<span class="log-ts">[${ts}]</span><span class="log-${type}">${msg}</span>`;
+  wrap.insertBefore(div, wrap.firstChild);
+  if (wrap.children.length > 30) wrap.removeChild(wrap.lastChild);
+}
+
+// ── 로딩 ─────────────────────────────────────────────────────
+function showLoading(text, sub, pct = 0) {
+  document.getElementById('ldText').textContent = text || '분석 중...';
+  document.getElementById('ldSub').textContent = sub || '';
+  document.getElementById('ldBar').style.width = pct + '%';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function updateLoading(text, sub, pct) {
+  document.getElementById('ldText').textContent = text;
+  document.getElementById('ldSub').textContent = sub;
+  document.getElementById('ldBar').style.width = pct + '%';
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Status ────────────────────────────────────────────────────
+function setStatus(msg) {
+  const e = document.getElementById('statusMsg');
+  if (e) e.textContent = msg;
+}
+
+// ── Enter 키 ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('searchInput');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+});
+</script>
+</body>
+</html>```
